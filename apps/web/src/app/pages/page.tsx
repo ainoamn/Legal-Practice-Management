@@ -9,7 +9,14 @@ export default async function Pages() {
   const pages = (await response.json()) as { slug: string; title: string }[];
   return (
     <main className="published-page">
-      <Link href="/">LEGAL OFFICE AI</Link>
+      <Link href="/" prefetch>
+        LEGAL OFFICE AI
+      </Link>
+      <p>
+        <Link href="/app" prefetch>
+          مساحة المكتب / Workspace
+        </Link>
+      </p>
       <h1>صفحات المنصة / Platform pages</h1>
       {pages.length ? (
         <div className="roles-grid">

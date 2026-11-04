@@ -68,7 +68,7 @@ export class BhdController {
     const state = randomUrlToken();
     const nonce = randomUrlToken();
     const { verifier, challenge } = createPkce();
-    const safeReturn = isSafeReturnTo(returnTo) ? returnTo! : "/";
+    const safeReturn = isSafeReturnTo(returnTo) ? returnTo! : "/app";
     const secure = process.env.NODE_ENV === "production";
     res.cookie(
       BHD_OAUTH_STATE_COOKIE,
@@ -151,7 +151,7 @@ export class BhdController {
           path: "/",
           expires: session.expiresAt,
         });
-        const dest = isSafeReturnTo(saved.returnTo) ? saved.returnTo : "/";
+        const dest = isSafeReturnTo(saved.returnTo) ? saved.returnTo : "/app";
         return res.redirect(dest);
       } catch (err) {
         const payload =

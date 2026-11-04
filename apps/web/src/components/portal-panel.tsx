@@ -365,7 +365,7 @@ export function ClientPortal() {
         <div className="alert error" role="alert">
           {error}
           <p>
-            <a href="/">{tr("صفحة تسجيل الدخول", "Sign-in page")}</a>
+            <a href="/app">{tr("صفحة تسجيل الدخول", "Sign-in page")}</a>
           </p>
         </div>
       )}

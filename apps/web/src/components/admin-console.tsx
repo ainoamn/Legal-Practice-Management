@@ -695,7 +695,7 @@ export function AdminConsole() {
               {busy ? t.saving : t.signIn}
             </button>
           </form>
-          <a className="admin-back" href="/">
+          <a className="admin-back" href="/app">
             {t.workspaces}
           </a>
         </div>
@@ -1066,7 +1066,7 @@ export function AdminConsole() {
           </div>
           <div className="utility">
             {language}
-            <a className="icon-button" href="/" title={t.workspaces}>
+            <a className="icon-button" href="/app" title={t.workspaces}>
               <Building2 size={18} />
             </a>
             <button

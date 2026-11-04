@@ -108,7 +108,7 @@ function isCurrentApp(app: BhdApp, pageOrigin: string) {
     return (
       here === "https://legal-office-web.vercel.app" ||
       here.includes("legal-office") ||
-      /^https?:\/\/(localhost|127\.0\.0\.1):(4310)$/.test(here)
+      /^https?:\/\/(localhost|127\.0\.0\.1):4310$/.test(here)
     );
   }
   return Boolean(app.origin) && here === stripSlash(app.origin);
