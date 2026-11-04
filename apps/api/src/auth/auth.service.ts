@@ -132,10 +132,14 @@ export class AuthService {
     tx: Tx,
     actor: Omit<Actor, "sessionId">,
     userAgent: string,
+    maxAgeSec?: number,
   ) {
     const token = randomBytes(32).toString("hex");
-    const hours = Number(process.env.SESSION_HOURS ?? 12);
-    const expiresAt = new Date(Date.now() + hours * 3600000);
+    const seconds =
+      typeof maxAgeSec === "number" && maxAgeSec >= 3600
+        ? maxAgeSec
+        : Number(process.env.SESSION_HOURS ?? 12) * 3600;
+    const expiresAt = new Date(Date.now() + seconds * 1000);
     await tx.session.create({
       data: {
         ...actor,

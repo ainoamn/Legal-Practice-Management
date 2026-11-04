@@ -17,7 +17,6 @@ import {
   Monitor,
   ScrollText,
   CalendarDays,
-  LogOut,
   ArrowUpLeft,
   Plus,
   Search,
@@ -46,6 +45,8 @@ import { PracticeConsole } from "../components/practice-console";
 import { FinanceConsole } from "../components/finance-console";
 import { InstrumentsConsole } from "../components/instruments-console";
 import { CalendarConsole } from "../components/calendar-console";
+import { BhdAppSwitcher } from "../components/bhd/BhdAppSwitcher";
+import { BhdSiteFooter } from "../components/bhd/BhdSiteFooter";
 import {
   api,
   ApiError,
@@ -78,6 +79,7 @@ export default function Home() {
     primaryColor: string;
     registrationOpen: boolean;
   } | null>(null);
+  const [bhdReady, setBhdReady] = useState(false);
   const [recoverOpen, setRecoverOpen] = useState(false);
   const [locale, setLocale] = useState<"ar" | "en">("ar"),
     [dark, setDark] = useState(false),
@@ -167,7 +169,11 @@ export default function Home() {
         primaryColor: string;
         registrationOpen: boolean;
       }>("public/settings"),
-    ]).then(([profile, catalog, brand]) => {
+      fetch("/api/auth/bhd/ready")
+        .then((r) => r.json())
+        .then((body: { ready?: boolean }) => Boolean(body.ready))
+        .catch(() => false),
+    ]).then(([profile, catalog, brand, bhd]) => {
       if (!live) return;
       if (profile.status === "fulfilled") setMe(profile.value);
       else if (!(
@@ -179,16 +185,46 @@ export default function Home() {
       else setError(errorText(catalog.reason));
       if (brand.status === "fulfilled") setBranding(brand.value);
       else setError(errorText(brand.reason));
+      if (bhd.status === "fulfilled") setBhdReady(bhd.value);
       setBooting(false);
       if (window.location.hash.startsWith("#reset=")) {
         setMe(null);
         setRecoverOpen(true);
       }
+      const params = new URLSearchParams(window.location.search);
+      const bhdError = params.get("error");
+      if (bhdError?.startsWith("bhd_")) {
+        const email = params.get("email");
+        const messages: Record<string, string> =
+          locale === "ar"
+            ? {
+                bhd_not_configured:
+                  "الدخول الموحد غير مفعّل بعد — استخدم حساب المكتب.",
+                bhd_no_office: email
+                  ? `لا عضوية مكتب مرتبطة بـ ${email}. اطلب دعوة من المكتب ثم أعد المحاولة.`
+                  : "لا عضوية مكتب لهذا الحساب. اطلب دعوة ثم أعد المحاولة.",
+                bhd_state: "انتهت جلسة التحقق. حاول الدخول الموحد مجدداً.",
+                bhd_token: "تعذّر إكمال الدخول الموحد.",
+                bhd_callback: "فشل التحقق من الهوية. حاول مجدداً.",
+              }
+            : {
+                bhd_not_configured:
+                  "Unified login is not configured yet — use office login.",
+                bhd_no_office: email
+                  ? `No office membership for ${email}. Ask for an invite, then retry.`
+                  : "No office membership for this account. Ask for an invite, then retry.",
+                bhd_state: "Login verification expired. Try unified login again.",
+                bhd_token: "Could not complete unified login.",
+                bhd_callback: "Identity verification failed. Try again.",
+              };
+        setError(messages[bhdError] ?? bhdError);
+        window.history.replaceState({}, "", window.location.pathname);
+      }
     });
     return () => {
       live = false;
     };
-  }, [errorText]);
+  }, [errorText, locale]);
   useEffect(() => {
     if (!branding) return;
     document.title = branding.brandName;
@@ -292,6 +328,10 @@ export default function Home() {
     }
   }
   async function logout() {
+    if (bhdReady) {
+      window.location.assign("/api/auth/bhd/logout");
+      return;
+    }
     setBusy(true);
     try {
       await api("auth/logout", "POST", {});
@@ -303,6 +343,9 @@ export default function Home() {
     } finally {
       setBusy(false);
     }
+  }
+  function logoutAll() {
+    window.location.assign("/api/auth/bhd/logout?all=1");
   }
   const controls = (
     <div className="utility">
@@ -322,16 +365,19 @@ export default function Home() {
       >
         {dark ? <Sun size={18} /> : <Moon size={18} />}
       </button>
-      {me && (
-        <button
-          className="icon-button"
-          onClick={logout}
-          disabled={busy}
-          aria-label={t.logout}
-        >
-          <LogOut size={18} />
-        </button>
-      )}
+      {me ? (
+        <BhdAppSwitcher
+          user={{
+            name: me.user.fullName,
+            email: me.user.email,
+            picture: null,
+            hasPassword: true,
+          }}
+          onSignOut={logout}
+          onSignOutAll={bhdReady ? logoutAll : undefined}
+          locale={locale}
+        />
+      ) : null}
     </div>
   );
   const feedback = (
@@ -364,6 +410,7 @@ export default function Home() {
     );
   if (!me)
     return (
+      <>
       <main className="auth-shell">
         <section className="auth-story">
           <div className="brand">
@@ -409,6 +456,22 @@ export default function Home() {
                 </div>
                 <h2>{mode === "login" ? t.login : t.register}</h2>
                 <p className="muted">{t.foundation}</p>
+                {bhdReady && mode === "login" ? (
+                  <>
+                    <a
+                      className="primary full"
+                      href="/api/auth/bhd/start?returnTo=%2F"
+                    >
+                      {locale === "ar"
+                        ? "الدخول بحساب بن حمود"
+                        : "Sign in with Bin Hamood"}
+                      <ArrowUpLeft size={17} />
+                    </a>
+                    <p className="muted" style={{ textAlign: "center" }}>
+                      {locale === "ar" ? "أو حساب المكتب" : "or office account"}
+                    </p>
+                  </>
+                ) : null}
                 <div className="segmented">
                   <button
                     className={mode === "login" ? "selected" : ""}
@@ -552,6 +615,8 @@ export default function Home() {
           </div>
         </section>
       </main>
+      <BhdSiteFooter locale={locale} />
+      </>
     );
   const nav: [Tab, typeof Users, string?][] = [
     ["overview", LayoutDashboard],
@@ -567,6 +632,7 @@ export default function Home() {
   ];
   const currentList = tab === "team" ? members : audit;
   return (
+    <>
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
@@ -1337,6 +1403,8 @@ export default function Home() {
         </div>
       )}
     </div>
+    <BhdSiteFooter locale={locale} />
+    </>
   );
 }
 function Field({

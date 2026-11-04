@@ -696,6 +696,12 @@ small {
   padding: 11px 19px;
   font-size: 13px;
   font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
 }
 .primary:hover {
   filter: brightness(0.94);

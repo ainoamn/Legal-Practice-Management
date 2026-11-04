@@ -8,10 +8,16 @@ const config: NextConfig = {
   ),
   transpilePackages: ["@legal/contracts"],
   async rewrites() {
+    const api =
+      process.env.INTERNAL_API_URL ?? "http://127.0.0.1:4311";
     return [
       {
+        source: "/api/auth/bhd/:path*",
+        destination: `${api}/api/v1/auth/bhd/:path*`,
+      },
+      {
         source: "/api/v1/:path*",
-        destination: `${process.env.INTERNAL_API_URL ?? "http://127.0.0.1:4311"}/api/v1/:path*`,
+        destination: `${api}/api/v1/:path*`,
       },
     ];
   },

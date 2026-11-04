@@ -21,6 +21,8 @@ import {
 } from "../../../packages/database/src/index.js";
 import { AuthController } from "./auth/auth.controller.js";
 import { AuthService } from "./auth/auth.service.js";
+import { BhdController } from "./auth/bhd.controller.js";
+import { BhdService } from "./auth/bhd.service.js";
 import { MfaService } from "./auth/mfa.service.js";
 import { Mailer, ResendMailer } from "./auth/mail.js";
 import { RecoveryService } from "./auth/recovery.service.js";
@@ -79,10 +81,11 @@ class PublicController {
 }
 @Global()
 @Module({
-  controllers: [AuthController],
-  exports: [AuthService],
+  controllers: [AuthController, BhdController],
+  exports: [AuthService, BhdService],
   providers: [
     AuthService,
+    BhdService,
     MfaService,
     RecoveryService,
     SessionGuard,

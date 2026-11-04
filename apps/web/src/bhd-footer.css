@@ -1,0 +1,79 @@
+.bhd-site-footer {
+  border-top: 1px solid #d7e2dc;
+  background: #f4f0e8;
+  color: #092d24;
+  margin-top: auto;
+}
+
+.bhd-footer-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.bhd-footer-programs-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.bhd-footer-programs-head p {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.bhd-footer-programs-head a,
+.bhd-footer-links a {
+  color: #075c45;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.85rem;
+}
+
+.bhd-footer-programs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.75rem 0.5rem;
+}
+
+.bhd-footer-program {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: #092d24;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.bhd-footer-program:hover {
+  color: #075c45;
+}
+
+.bhd-footer-program .bhd-app-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.bhd-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #d7e2dc;
+}
+
+.bhd-footer-copy {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #4a635a;
+}

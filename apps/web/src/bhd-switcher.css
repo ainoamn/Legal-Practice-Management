@@ -1,0 +1,324 @@
+.bhd-app-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.bhd-app-icon svg {
+  display: block;
+  width: 72%;
+  height: 72%;
+}
+
+.bhd-switcher-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bhd-switcher-grid,
+.bhd-switcher-avatar {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #092d24;
+}
+
+.bhd-switcher-grid span {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 3px;
+}
+
+.bhd-switcher-grid i {
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.bhd-switcher-avatar img,
+.bhd-switcher-avatar span {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bhd-switcher-avatar span {
+  display: grid;
+  place-items: center;
+  background: #092d24;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.bhd-switcher-card {
+  position: absolute;
+  inset: calc(100% + 10px) 0 auto auto;
+  z-index: 80;
+  width: 320px;
+  max-height: 360px;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid #d7e2dc;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(9, 45, 36, 0.12);
+}
+
+.bhd-switcher-card-head p {
+  margin: 0 4px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.bhd-switcher-grid-apps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.bhd-switcher-app {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 4px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bhd-switcher-app span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bhd-switcher-app:hover,
+.bhd-switcher-app:focus-visible {
+  background: #f5f7f6;
+}
+
+.bhd-switcher-app.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bhd-switcher-mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.bhd-switcher-mark.is-current {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px currentColor;
+}
+
+/* بطاقة الحساب — docs/BHD-ACCOUNT-SWITCHER.md */
+.bhd-switcher-account {
+  width: min(360px, calc(100vw - 24px));
+  max-height: min(480px, calc(100svh - 88px));
+  padding: 8px 0 4px;
+}
+
+.bhd-switcher-account-now {
+  display: grid;
+  justify-items: stretch;
+  gap: 4px;
+  padding: 12px 16px 10px;
+}
+
+.bhd-switcher-account-now .bhd-switcher-person {
+  padding: 4px 0 8px;
+}
+
+.bhd-switcher-manage {
+  display: inline-flex;
+  align-self: start;
+  margin-inline-start: 68px;
+  padding: 4px 0 2px;
+  color: #075c45;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bhd-switcher-account-list,
+.bhd-switcher-account-foot {
+  border-top: 1px solid #e6eeea;
+}
+
+.bhd-switcher-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+}
+
+.bhd-switcher-face {
+  position: relative;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+}
+
+.bhd-switcher-face.is-large {
+  flex-basis: 56px;
+  width: 56px;
+  height: 56px;
+}
+
+.bhd-switcher-face img,
+.bhd-switcher-face > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #092d24;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.bhd-switcher-face.is-action > span {
+  background: #f4f7f5;
+  color: #092d24;
+  box-shadow: inset 0 0 0 1px #d7e2dc;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.bhd-switcher-who {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+
+.bhd-switcher-who-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bhd-switcher-who strong,
+.bhd-switcher-who small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bhd-switcher-who strong {
+  font-size: 13px;
+  font-weight: 650;
+  color: #092d24;
+}
+
+.bhd-switcher-who small {
+  color: #5d7169;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bhd-switcher-providers {
+  display: flex;
+  gap: 2px;
+}
+
+.bhd-switcher-provider {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: default;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.bhd-switcher-provider.is-password {
+  background: #092d24;
+  color: #fff;
+}
+
+.bhd-switcher-provider.is-google {
+  background: #fff;
+  color: #1a73e8;
+  box-shadow: 0 0 0 2px #fff, inset 0 0 0 1px #dadce0;
+}
+
+.bhd-switcher-provider.is-facebook {
+  background: #1877f2;
+  color: #fff;
+}
+
+.bhd-switcher-provider.is-whatsapp {
+  background: #25d366;
+  color: #fff;
+}
+
+.bhd-switcher-account-choice {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.bhd-switcher-account-choice:hover,
+.bhd-switcher-account-choice:focus-visible {
+  background: #f5f7f6;
+}
+
+.bhd-switcher-account-foot .bhd-switcher-account-choice {
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+@media (max-width: 600px) {
+  .bhd-switcher-card {
+    position: fixed;
+    inset: 78px 12px auto;
+    width: auto;
+    max-width: none;
+  }
+}
