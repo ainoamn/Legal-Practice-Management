@@ -228,19 +228,42 @@ export class BhdController {
       ? authorization.slice(7)
       : "";
     if (!bearer) throw new HttpException("UNAUTHENTICATED", 401);
-    const meResp = await fetch(`${bhdIdentityIssuer()}/api/auth/me`, {
+
+    const issuer = bhdIdentityIssuer();
+    let sub = "";
+    let email = "";
+    let name: string | null = null;
+
+    const userinfoResp = await fetch(`${issuer}/oauth/userinfo`, {
       headers: { Authorization: `Bearer ${bearer}` },
     });
-    if (!meResp.ok) throw new HttpException("UNAUTHENTICATED", 401);
-    const body = (await meResp.json()) as {
-      user?: { id?: string; email?: string; name?: string };
-    };
-    if (!body.user?.id || !body.user.email)
-      throw new HttpException("UNAUTHENTICATED", 401);
+    if (userinfoResp.ok) {
+      const info = (await userinfoResp.json()) as {
+        sub?: string;
+        email?: string;
+        name?: string;
+      };
+      sub = info.sub?.trim() || "";
+      email = info.email?.trim().toLowerCase() || "";
+      name = info.name?.trim() || null;
+    } else {
+      const meResp = await fetch(`${issuer}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${bearer}` },
+      });
+      if (!meResp.ok) throw new HttpException("UNAUTHENTICATED", 401);
+      const body = (await meResp.json()) as {
+        user?: { id?: string; email?: string; name?: string };
+      };
+      sub = body.user?.id?.trim() || "";
+      email = body.user?.email?.trim().toLowerCase() || "";
+      name = body.user?.name?.trim() || null;
+    }
+    if (!sub || !email) throw new HttpException("UNAUTHENTICATED", 401);
+
     const userId = await this.bhd.linkOrCreate({
-      sub: body.user.id,
-      email: body.user.email.trim().toLowerCase(),
-      name: body.user.name ?? null,
+      sub,
+      email,
+      name,
       picture: null,
     });
     const session = await this.bhd.issueForUser(

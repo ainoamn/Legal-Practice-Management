@@ -11,18 +11,26 @@ export type BhdOauthState = {
   redirectUri: string;
 };
 
+function cleanEnv(value: string | undefined) {
+  return (value ?? "")
+    .replace(/\\r\\n/g, "")
+    .replace(/\\n/g, "")
+    .replace(/[\r\n]+/g, "")
+    .trim();
+}
+
 export function bhdIdentityIssuer() {
   return (
-    process.env.BHD_IDENTITY_ISSUER?.trim() || "https://id.bhd-om.com"
+    cleanEnv(process.env.BHD_IDENTITY_ISSUER) || "https://id.bhd-om.com"
   ).replace(/\/$/, "");
 }
 
 export function bhdOauthClientId() {
-  return (process.env.BHD_OAUTH_CLIENT_ID?.trim() || "bhd-legal").trim();
+  return cleanEnv(process.env.BHD_OAUTH_CLIENT_ID) || "bhd-legal";
 }
 
 export function bhdOauthClientSecret() {
-  return process.env.BHD_OAUTH_CLIENT_SECRET?.trim() || "";
+  return cleanEnv(process.env.BHD_OAUTH_CLIENT_SECRET);
 }
 
 export function isSafeReturnTo(value: string | null | undefined) {
@@ -47,8 +55,8 @@ export function createPkce() {
 
 function stateSecret() {
   return (
-    process.env.AUTH_SECRET?.trim() ||
-    process.env.MFA_ENCRYPTION_KEY?.trim() ||
+    cleanEnv(process.env.AUTH_SECRET) ||
+    cleanEnv(process.env.MFA_ENCRYPTION_KEY) ||
     "legal-dev-bhd-state"
   );
 }
@@ -88,10 +96,18 @@ export function decodeOauthStateCookie(raw: string | undefined) {
 }
 
 export function requestOrigin(request: Request) {
-  const configured = process.env.WEB_ORIGIN?.trim() || process.env.NEXT_PUBLIC_WEB_ORIGIN?.trim();
+  const configured =
+    cleanEnv(process.env.WEB_ORIGIN) ||
+    cleanEnv(process.env.NEXT_PUBLIC_WEB_ORIGIN);
   if (configured) return configured.replace(/\/$/, "");
   const url = new URL(request.url);
   const proto = request.headers.get("x-forwarded-proto") || url.protocol.replace(":", "");
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || url.host;
   return `${proto}://${host}`.replace(/\/$/, "");
+}
+
+export function internalApiUrl() {
+  return (
+    cleanEnv(process.env.INTERNAL_API_URL) || "http://127.0.0.1:4311"
+  ).replace(/\/$/, "");
 }

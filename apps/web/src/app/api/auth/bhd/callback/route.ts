@@ -5,6 +5,7 @@ import {
   bhdOauthClientId,
   bhdOauthClientSecret,
   decodeOauthStateCookie,
+  internalApiUrl,
   isSafeReturnTo,
   requestOrigin,
 } from "../../../../../lib/bhd/oauth-state";
@@ -65,10 +66,7 @@ export async function GET(request: NextRequest) {
     const tokens = (await tokenResp.json()) as { access_token?: string };
     if (!tokens.access_token) return fail(request, "bhd_token", secure);
 
-    const api = (process.env.INTERNAL_API_URL ?? "http://127.0.0.1:4311").replace(
-      /\/$/,
-      "",
-    );
+    const api = internalApiUrl();
     const origin = requestOrigin(request);
     const rebind = await fetch(`${api}/api/v1/auth/bhd/rebind`, {
       method: "POST",

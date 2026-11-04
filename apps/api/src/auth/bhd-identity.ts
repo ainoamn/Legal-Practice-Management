@@ -32,20 +32,26 @@ export function isBhdIdentityReady() {
   return Boolean(isBhdAuthorizeReady() && bhdOauthClientSecret());
 }
 
+function cleanEnv(value: string | undefined) {
+  return (value ?? "")
+    .replace(/\\r\\n/g, "")
+    .replace(/\\n/g, "")
+    .replace(/[\r\n]+/g, "")
+    .trim();
+}
+
 export function bhdIdentityIssuer() {
   return (
-    process.env.BHD_IDENTITY_ISSUER?.trim() || "https://id.bhd-om.com"
+    cleanEnv(process.env.BHD_IDENTITY_ISSUER) || "https://id.bhd-om.com"
   ).replace(/\/$/, "");
 }
 
 export function bhdOauthClientId() {
-  return (
-    process.env.BHD_OAUTH_CLIENT_ID?.trim() || BHD_CLIENT_ID_DEFAULT
-  ).trim();
+  return cleanEnv(process.env.BHD_OAUTH_CLIENT_ID) || BHD_CLIENT_ID_DEFAULT;
 }
 
 export function bhdOauthClientSecret() {
-  return process.env.BHD_OAUTH_CLIENT_SECRET?.trim() || "";
+  return cleanEnv(process.env.BHD_OAUTH_CLIENT_SECRET);
 }
 
 export function bhdRedirectUri(origin: string) {
