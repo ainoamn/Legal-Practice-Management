@@ -1,0 +1,76 @@
+{
+  "name": "legal-office-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24.14.0 <25"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm run dev -w @legal/api\" \"npm run dev -w @legal/web\"",
+    "build": "npm run build -w @legal/api && npm run build -w @legal/web",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tsconfig.tools.json",
+    "lint": "eslint apps packages tests scripts *.ts *.mjs --max-warnings 0",
+    "format": "prettier --write apps packages tests docs *.md *.json",
+    "db:generate": "prisma generate --config packages/database/prisma.config.ts",
+    "db:deploy": "prisma migrate deploy --config packages/database/prisma.config.ts",
+    "test": "vitest run tests/unit.test.ts",
+    "test:integration": "vitest run tests/integration.test.ts tests/platform.test.ts tests/practice.test.ts tests/finance.test.ts tests/portal.test.ts tests/instruments.test.ts --testTimeout=30000",
+    "test:documents": "vitest run tests/documents.test.ts --testTimeout=90000",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:integration && npm run test:documents && npm run build && npm run test:e2e",
+    "admin:bootstrap": "powershell -NoProfile -File scripts/bootstrap-admin.ps1",
+    "test:setup": "tsx scripts/setup-test-db.ts",
+    "security:key": "tsx scripts/create-mfa-key.ts",
+    "storage:setup": "tsx scripts/configure-local-documents.ts",
+    "storage:dev": "tsx scripts/start-local-storage.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1161.0",
+    "@nestjs/common": "12.3.2",
+    "@nestjs/core": "12.3.2",
+    "@nestjs/platform-express": "12.3.2",
+    "@nestjs/swagger": "12.1.0",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "argon2": "0.45.2",
+    "bullmq": "6.5.4",
+    "cookie-parser": "1.4.7",
+    "docx": "9.15.1",
+    "dotenv": "18.0.9",
+    "helmet": "8.3.0",
+    "ioredis": "6.0.0",
+    "mammoth": "1.13.0",
+    "pg": "8.23.1",
+    "playwright": "1.64.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/cookie-parser": "1.4.10",
+    "@types/express": "5.0.6",
+    "@types/multer": "2.3.0",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "concurrently": "10.0.6",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.14.0",
+    "prettier": "3.9.10",
+    "prisma": "7.10.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.1.0"
+  },
+  "overrides": {
+    "minimatch": "11.0.4"
+  }
+}

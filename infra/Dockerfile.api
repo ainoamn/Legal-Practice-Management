@@ -1,0 +1,17 @@
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+COPY . .
+RUN npm ci && DATABASE_URL=postgresql://placeholder DIRECT_DATABASE_URL=postgresql://placeholder npm run db:generate && npm run build -w @legal/api
+FROM node:24-bookworm-slim
+ENV NODE_ENV=production
+ENV API_HOST=0.0.0.0
+WORKDIR /app
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+RUN apt-get update && apt-get install -y --no-install-recommends clamav tesseract-ocr tesseract-ocr-ara poppler-utils fonts-noto-core && npx playwright install --with-deps chromium && chmod -R a+rX /root/.cache/ms-playwright && cp -a /root/.cache/ms-playwright /ms-playwright && chown -R node:node /ms-playwright && rm -rf /var/lib/apt/lists/*
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN freshclam --stdout
+COPY --from=build --chown=node:node /app/apps/api/dist ./apps/api/dist
+COPY --from=build --chown=node:node /app/package.json ./package.json
+USER node
+EXPOSE 4311
+CMD ["node","apps/api/dist/apps/api/src/main.js"]

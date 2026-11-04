@@ -1,0 +1,17 @@
+# Security architecture
+
+Threats: cross-tenant IDOR, privilege escalation, stolen sessions, credential guessing, CSRF/XSS, support access, untrusted uploads and RAG injection. Layers: validation → session → active membership → action grant → resource/branch scope → tenant transaction → composite FK and forced RLS.
+
+Argon2id hashes; opaque 256-bit tokens stored SHA-256; HttpOnly SameSite=Lax cookie, Secure in production, no browser token storage. Same-origin enforcement for every unsafe request including auth; JSON-only input. Fixed session expiry and revoke endpoints. Generic invalid-login messages; Redis rate limits by IP and hashed email; never log passwords, cookies or tokens. Membership suspension revokes access immediately. Owner role cannot be granted/edited through team APIs; no actor can delegate permissions they lack. Last owner is protected by immutability of owner membership in this phase.
+
+Production refuses superuser/BYPASSRLS runtime DB access. All API errors use stable codes with request IDs; internal stack and SQL are hidden. Health readiness checks DB/Redis. Helmet and same-origin proxy; TLS terminates at reverse proxy. Infrastructure ports bound to loopback in development.
+
+AuditLog only INSERT/SELECT for runtime principal; modifications to members/roles/settings are transactional with audit events. Administrative DB access still requires infrastructure audit and external immutable log retention before production. No claim of tamperproof storage against DB administrators.
+
+MFA now supports RFC 6238 TOTP with a one-step clock window, replay counters, AES-256-GCM encryption bound to user ID, ten hashed one-use recovery codes, password reauthentication, expiring setup and session revocation. A 32-byte MFA_ENCRYPTION_KEY is required to enable it. Provisioning uses manual authenticator-secret entry; no QR rendering dependency. Identity advisory locks serialize login/MFA/password reset. Login rechecks the password hash after acquiring the lock, preventing old credentials from issuing a session after a concurrent reset.
+
+Password recovery uses 256-bit random tokens stored only as hashes, a 30-minute expiry, atomic single-use consumption, tenant membership validation and revocation of all old sessions. MFA remains enabled after a reset. Browser links put the token in a fragment, then remove it from browser history; no HTTP query-string token is logged. A Mailer interface has a Resend adapter, disabled without settings. Tests use an injected in-memory mailer and never send real messages. Generic forgot-password response bodies avoid direct account disclosure; delivery currently runs inline and needs an outbox/retries and timing-enumeration review before commercial release.
+
+Release gates: verified real email delivery and verified account onboarding, MFA key backup/rotation, penetration review, retention/DSAR procedures, consent/DPA and cross-border review, support break-glass, tested encrypted backup/restore, proxy/IP load tests and observability. OWASP ASVS/Top 10 are review frameworks, not certifications. Do not deploy commercially before these gates and remaining modules pass.
+
+Omani legal references supplied by the request (6/2022, 34/2024, 41/2024, 39/2025) remain an explicit legal-review backlog. No legal rules, court deadline calculation or compliance claim is implemented from unverified text. Government integrations remain disabled absent official documented authorization.

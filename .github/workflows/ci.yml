@@ -1,0 +1,61 @@
+name: Platform checks
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: legal_test
+          POSTGRES_USER: legal_owner
+          POSTGRES_PASSWORD: legal_ci_owner
+        ports: ["54329:5432"]
+        options: >-
+          --health-cmd "pg_isready -U legal_owner -d legal_test"
+          --health-interval 5s --health-retries 15
+      redis:
+        image: redis:8-alpine
+        ports: ["63799:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-retries 15
+    env:
+      DATABASE_URL: postgresql://legal_app:legal_ci_app@localhost:54329/legal_test
+      PLATFORM_DATABASE_URL: postgresql://legal_platform:legal_ci_platform@localhost:54329/legal_test
+      DIRECT_DATABASE_URL: postgresql://legal_owner:legal_ci_owner@localhost:54329/legal_test
+      REDIS_URL: redis://localhost:63799
+      WEB_ORIGIN: http://localhost:4310
+      INTERNAL_API_URL: http://127.0.0.1:4311
+      API_PORT: "4311"
+      SESSION_HOURS: "12"
+      # CI-only fixture. Never use this key outside tests.
+      MFA_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+      CI: "true"
+      LEGAL_TEST_ENV: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Create restricted runtime role
+        env:
+          PGPASSWORD: legal_ci_owner
+        run: psql -h localhost -p 54329 -U legal_owner -d legal_test -c "CREATE ROLE legal_app LOGIN PASSWORD 'legal_ci_app' NOSUPERUSER NOBYPASSRLS; CREATE ROLE legal_platform LOGIN PASSWORD 'legal_ci_platform' NOSUPERUSER NOBYPASSRLS; GRANT USAGE ON SCHEMA public TO legal_app, legal_platform;"
+      - run: npm run db:generate
+      - run: npm run db:deploy
+      - name: Install real document scanning and OCR tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clamav tesseract-ocr tesseract-ocr-ara poppler-utils fonts-noto-core
+          sudo systemctl stop clamav-freshclam || true
+          sudo freshclam
+      - run: bash scripts/ci-document-services.sh
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failures
+          path: test-results/

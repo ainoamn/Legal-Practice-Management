@@ -1,0 +1,17 @@
+{
+  "name": "@legal/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./platform": "./src/platform.ts",
+    "./practice": "./src/practice.ts",
+    "./finance": "./src/finance.ts",
+    "./documents": "./src/documents.ts",
+    "./portal": "./src/portal.ts",
+    "./instruments": "./src/instruments.ts",
+    "./instrument-money": "./src/instrument-money.ts",
+    "./calendar-time": "./src/calendar-time.ts"
+  }
+}

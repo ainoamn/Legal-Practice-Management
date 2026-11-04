@@ -1,0 +1,738 @@
+generator client {
+  provider = "prisma-client"
+  output = "../generated"
+  importFileExtension = "js"
+}
+datasource db {
+  provider = "postgresql"
+}
+model Country {
+  code String @id
+  nameAr String
+  nameEn String
+  currency String
+  timezone String
+  currencyDecimals Int @default(3)
+  enabled Boolean @default(true)
+  tenants Tenant[]
+}
+model Tenant {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  slug String @unique
+  countryCode String
+  country Country @relation(fields:[countryCode],references:[code])
+  timezone String
+  currency String
+  accessStatus String @default("ACTIVE")
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  branches Branch[]
+  roles Role[]
+  memberships Membership[]
+  auditLogs AuditLog[]
+  directory OfficeDirectory?
+  passwordResets PasswordReset[]
+  subscription Subscription?
+  platformInvoices PlatformInvoice[]
+  @@unique([id,slug])
+}
+model OfficeDirectory {
+  tenantId String @id @db.Uuid
+  tenant Tenant @relation(fields:[tenantId,slug],references:[id,slug])
+  slug String @unique
+  @@unique([tenantId,slug])
+}
+model Branch {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id])
+  name String
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  members Membership[]
+  @@unique([tenantId,id])
+}
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  email String @unique
+  passwordHash String
+  fullName String
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  memberships Membership[]
+  sessions Session[]
+  mfa MFAConfiguration?
+  passwordResets PasswordReset[]
+}
+model PasswordReset {
+  id String @id @default(uuid()) @db.Uuid
+  tokenHash String @unique
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onUpdate:NoAction)
+  tenantId String @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id],onUpdate:NoAction)
+  membership Membership @relation(fields:[tenantId,userId],references:[tenantId,userId],onUpdate:NoAction)
+  expiresAt DateTime @db.Timestamptz
+  usedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([userId,expiresAt])
+}
+model MFAConfiguration {
+  userId String @id @db.Uuid
+  user User @relation(fields:[userId],references:[id],onUpdate:NoAction)
+  enabled Boolean @default(false)
+  encryptedSecret String?
+  pendingSecret String?
+  pendingExpiresAt DateTime? @db.Timestamptz
+  lastCounter BigInt @default(-1)
+  recoveryHashes String[] @default([])
+  updatedAt DateTime @updatedAt @db.Timestamptz
+}
+model Role {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id])
+  name String
+  key String
+  permissions String[]
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  members Membership[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,key])
+}
+model Membership {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id])
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id])
+  roleId String @db.Uuid
+  role Role @relation(fields:[tenantId,roleId],references:[tenantId,id])
+  branchId String @db.Uuid
+  branch Branch @relation(fields:[tenantId,branchId],references:[tenantId,id])
+  active Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  sessions Session[]
+  passwordResets PasswordReset[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,userId])
+  @@unique([tenantId,id,userId])
+  @@index([tenantId,active])
+}
+model Session {
+  id String @id @default(uuid()) @db.Uuid
+  tokenHash String @unique
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id])
+  tenantId String @db.Uuid
+  membershipId String @db.Uuid
+  membership Membership @relation(fields:[tenantId,membershipId,userId],references:[tenantId,id,userId])
+  userAgent String
+  createdAt DateTime @default(now()) @db.Timestamptz
+  expiresAt DateTime @db.Timestamptz
+  revokedAt DateTime? @db.Timestamptz
+  @@index([userId,expiresAt])
+}
+model AuditLog {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id])
+  actorId String? @db.Uuid
+  action String
+  resourceId String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,createdAt])
+}
+model PlatformAdmin {
+  id String @id @default(uuid()) @db.Uuid
+  email String @unique
+  name String
+  passwordHash String
+  kind String @default("OPERATOR")
+  permissions String[]
+  active Boolean @default(true)
+  encryptedSecret String?
+  pendingSecret String?
+  pendingExpiresAt DateTime? @db.Timestamptz
+  lastCounter BigInt @default(-1)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  sessions PlatformSession[]
+  audit PlatformAudit[]
+  recordedPayments PlatformPayment[]
+}
+model PlatformSession {
+  id String @id @default(uuid()) @db.Uuid
+  adminId String @db.Uuid
+  admin PlatformAdmin @relation(fields:[adminId],references:[id])
+  tokenHash String @unique
+  verified Boolean @default(false)
+  expiresAt DateTime @db.Timestamptz
+  revokedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([adminId,expiresAt])
+}
+model PlatformAudit {
+  id String @id @default(uuid()) @db.Uuid
+  adminId String? @db.Uuid
+  admin PlatformAdmin? @relation(fields:[adminId],references:[id])
+  action String
+  targetId String?
+  details Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([createdAt])
+}
+model Plan {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  priceMinor Int
+  currency String
+  currencyDecimals Int @default(3)
+  interval String
+  maxUsers Int
+  maxMatters Int
+  maxBranches Int
+  maxStorageMiB Int
+  maxAiOperations Int
+  active Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  subscriptions Subscription[]
+}
+model Subscription {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @unique @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id],onUpdate:NoAction,map:"subscription_tenant_fk")
+  planId String @db.Uuid
+  plan Plan @relation(fields:[planId],references:[id])
+  status String
+  startsAt DateTime @default(now()) @db.Timestamptz
+  currentPeriodEnd DateTime @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  @@index([status,currentPeriodEnd])
+}
+model PlatformInvoice {
+  id String @id @default(uuid()) @db.Uuid
+  number Int @unique @default(autoincrement())
+  tenantId String @db.Uuid
+  tenant Tenant @relation(fields:[tenantId],references:[id],onUpdate:NoAction,map:"invoice_tenant_fk")
+  description String
+  amountMinor Int
+  currency String
+  currencyDecimals Int
+  dueAt DateTime @db.Timestamptz
+  voidedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  payments PlatformPayment[]
+  @@index([tenantId,createdAt])
+}
+model PlatformPayment {
+  id String @id @default(uuid()) @db.Uuid
+  invoiceId String @db.Uuid
+  invoice PlatformInvoice @relation(fields:[invoiceId],references:[id])
+  reference String @unique
+  amountMinor Int
+  method String
+  recordedBy String @db.Uuid
+  recorder PlatformAdmin @relation(fields:[recordedBy],references:[id],onUpdate:NoAction,map:"payment_actor_fk")
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([invoiceId])
+}
+model SitePage {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique
+  title String
+  body String
+  status String @default("DRAFT")
+  publishedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+}
+model PlatformSettings {
+  id String @id @default("default")
+  brandName String
+  primaryColor String
+  supportEmail String?
+  registrationOpen Boolean @default(true)
+  updatedAt DateTime @updatedAt @db.Timestamptz
+}
+model Client {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  branchId String @db.Uuid
+  createdBy String @db.Uuid
+  name String
+  kind String @default("INDIVIDUAL")
+  identityNumber String?
+  registrationNumber String?
+  taxNumber String?
+  nationality String?
+  birthDate DateTime? @db.Date
+  email String?
+  phone String?
+  address String?
+  representative String?
+  notes String @default("")
+  tags String[] @default([])
+  archived Boolean @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  matters Matter[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,identityNumber])
+  @@unique([tenantId,registrationNumber])
+  @@index([tenantId,name])
+}
+model Court {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  name String
+  countryCode String
+  region String @default("")
+  address String @default("")
+  matters Matter[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,name,countryCode])
+}
+model Matter {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  branchId String @db.Uuid
+  createdBy String @db.Uuid
+  sequence Int
+  reference String
+  courtNumber String @default("")
+  title String
+  category String
+  status String @default("NEW")
+  countryCode String
+  region String @default("")
+  division String @default("")
+  claimType String @default("")
+  litigationLevel String @default("FIRST_INSTANCE")
+  filedAt DateTime? @db.Date
+  registeredAt DateTime? @db.Date
+  claimMinor Int?
+  confidentiality String @default("NORMAL")
+  clientVisible Boolean @default(false)
+  summary String @default("")
+  currentPosition String @default("")
+  nextStep String @default("")
+  clientId String @db.Uuid
+  client Client @relation(fields:[tenantId,clientId],references:[tenantId,id],onUpdate:NoAction)
+  courtId String? @db.Uuid
+  court Court? @relation(fields:[tenantId,courtId],references:[tenantId,id],onUpdate:NoAction)
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  assignments MatterAssignment[]
+  parties MatterParty[]
+  hearings Hearing[]
+  tasks WorkTask[]
+  notes MatterNote[]
+  events MatterEvent[]
+  documents LegalDocument[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,sequence])
+  @@unique([tenantId,reference])
+  @@index([tenantId,status])
+}
+model ClientAccess {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  clientId String @db.Uuid
+  memberId String @db.Uuid
+  active Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@unique([tenantId,memberId])
+}
+model PortalMessage {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  clientId String @db.Uuid
+  memberId String @db.Uuid
+  sender String
+  body String
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,clientId,createdAt])
+}
+model PortalRequest {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  clientId String @db.Uuid
+  memberId String @db.Uuid
+  kind String
+  body String
+  preferredAt DateTime? @db.Timestamptz
+  status String @default("OPEN")
+  response String @default("")
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  @@index([tenantId,clientId,createdAt])
+}
+model LegalDocument {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  title String
+  kind String
+  tags String[] @default([])
+  status String @default("DRAFT")
+  currentVersion Int @default(0)
+  approvedVersion Int?
+  approvedBy String? @db.Uuid
+  approvedAt DateTime? @db.Timestamptz
+  clientVisible Boolean @default(false)
+  createdBy String @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  versions DocumentVersion[]
+  @@unique([tenantId,id])
+  @@index([tenantId,matterId])
+}
+model DocumentVersion {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  documentId String @db.Uuid
+  document LegalDocument @relation(fields:[tenantId,documentId],references:[tenantId,id],onUpdate:NoAction)
+  version Int
+  objectKey String @unique
+  filename String
+  mime String
+  size Int
+  sha256 String
+  state String @default("PENDING")
+  processingStartedAt DateTime? @db.Timestamptz
+  extractedText String @default("")
+  requiresReview Boolean @default(true)
+  extractionMethod String?
+  failureCode String?
+  uploadedBy String @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@unique([tenantId,id])
+  @@unique([tenantId,documentId,version])
+  @@index([tenantId,state])
+}
+model DocumentTemplate {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  title String
+  kind String
+  body String
+  locale String @default("ar")
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  @@index([tenantId])
+}
+model LedgerAccount {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  code String
+  name String
+  kind String
+  fund String
+  entries JournalLine[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,code])
+}
+model Journal {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  reference String
+  description String
+  fund String
+  clientId String? @db.Uuid
+  postedBy String @db.Uuid
+  postedAt DateTime @default(now()) @db.Timestamptz
+  lines JournalLine[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,reference])
+  @@index([tenantId,postedAt])
+}
+model JournalLine {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  journalId String @db.Uuid
+  journal Journal @relation(fields:[tenantId,journalId],references:[tenantId,id],onUpdate:NoAction)
+  accountId String @db.Uuid
+  account LedgerAccount @relation(fields:[tenantId,accountId],references:[tenantId,id],onUpdate:NoAction)
+  debitMinor Int @default(0)
+  creditMinor Int @default(0)
+  clientId String? @db.Uuid
+  matterId String? @db.Uuid
+  @@index([tenantId,accountId])
+}
+model OfficeInvoice {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  sequence Int
+  clientId String @db.Uuid
+  matterId String? @db.Uuid
+  status String @default("DRAFT")
+  description String
+  quantity Int
+  unitPriceMinor Int
+  discountMinor Int
+  taxBasisPoints Int
+  netMinor Int
+  taxMinor Int
+  totalMinor Int
+  dueAt DateTime @db.Timestamptz
+  issuedAt DateTime? @db.Timestamptz
+  clientVisible Boolean @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  receipts OfficeReceipt[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,sequence])
+  @@index([tenantId,clientId])
+}
+model OfficeReceipt {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  invoiceId String @db.Uuid
+  invoice OfficeInvoice @relation(fields:[tenantId,invoiceId],references:[tenantId,id],onUpdate:NoAction)
+  reference String
+  amountMinor Int
+  method String
+  paidAt DateTime @db.Timestamptz
+  recordedBy String @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@unique([tenantId,reference])
+}
+model OfficeExpense {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  clientId String? @db.Uuid
+  matterId String? @db.Uuid
+  category String
+  description String
+  vendor String
+  amountMinor Int
+  incurredAt DateTime @db.Timestamptz
+  createdBy String @db.Uuid
+  approvedBy String? @db.Uuid
+  approvedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,incurredAt])
+}
+model FeeAgreement {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  clientId String @db.Uuid
+  matterId String? @db.Uuid
+  kind String
+  amountMinor Int
+  terms String
+  agreedAt DateTime @db.Timestamptz
+  documentId String? @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@unique([tenantId,id])
+}
+model TimeEntry {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  memberId String @db.Uuid
+  description String
+  minutes Int
+  hourlyRateMinor Int
+  amountMinor Int
+  workedAt DateTime @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,matterId])
+}
+model LegalInstrument {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  branchId String @db.Uuid
+  clientId String @db.Uuid
+  matterId String? @db.Uuid
+  documentId String? @db.Uuid
+  documentVersionId String? @db.Uuid
+  createdBy String @db.Uuid
+  responsibleId String @db.Uuid
+  kind String
+  sequence Int
+  reference String
+  referenceNumber String?
+  title String
+  category String
+  partyOne String
+  partyTwo String @default("")
+  agent String @default("")
+  issuingAuthority String @default("")
+  status String @default("DRAFT")
+  confidentiality String @default("NORMAL")
+  issuedAt DateTime @db.Date
+  startsAt DateTime? @db.Date
+  endsAt DateTime? @db.Date
+  renewalAt DateTime? @db.Date
+  amountMinor Decimal? @db.Decimal(20,0)
+  currency String
+  currencyDecimals Int
+  terms String @default("")
+  notes String @default("")
+  reminderDays Int[] @default([30,7,1,0])
+  version Int @default(1)
+  approvedBy String? @db.Uuid
+  approvedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  obligations InstrumentObligation[]
+  reminders InstrumentReminder[]
+  events InstrumentEvent[]
+  @@unique([tenantId,id])
+  @@unique([tenantId,sequence])
+  @@unique([tenantId,reference])
+  @@unique([tenantId,kind,referenceNumber])
+  @@index([tenantId,endsAt])
+  @@index([tenantId,clientId])
+  @@index([tenantId,responsibleId])
+}
+model InstrumentObligation {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  instrumentId String @db.Uuid
+  instrument LegalInstrument @relation(fields:[tenantId,instrumentId],references:[tenantId,id],onUpdate:NoAction)
+  title String
+  description String @default("")
+  assignedTo String @db.Uuid
+  dueAt DateTime @db.Timestamptz
+  amountMinor Decimal? @db.Decimal(20,0)
+  currency String
+  currencyDecimals Int
+  status String @default("TODO")
+  completedAt DateTime? @db.Timestamptz
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  @@unique([tenantId,id,instrumentId])
+  @@index([tenantId,dueAt])
+}
+model InstrumentReminder {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  instrumentId String @db.Uuid
+  instrument LegalInstrument @relation(fields:[tenantId,instrumentId],references:[tenantId,id],onUpdate:NoAction)
+  obligationId String? @db.Uuid
+  memberId String @db.Uuid
+  kind String
+  dueAt DateTime @db.Timestamptz
+  readAt DateTime? @db.Timestamptz
+  cancelledAt DateTime? @db.Timestamptz
+  generation Int
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,memberId,dueAt])
+}
+model InstrumentEvent {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  instrumentId String @db.Uuid
+  instrument LegalInstrument @relation(fields:[tenantId,instrumentId],references:[tenantId,id],onUpdate:NoAction)
+  actorId String @db.Uuid
+  action String
+  details Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,instrumentId,createdAt])
+}
+model MatterAssignment {
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  memberId String @db.Uuid
+  lead Boolean @default(false)
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  @@id([tenantId,matterId,memberId])
+}
+model MatterParty {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  name String
+  kind String
+  identityNumber String?
+  lawyer String @default("")
+  contact String @default("")
+  @@index([tenantId,matterId])
+}
+model Hearing {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  responsibleId String @db.Uuid
+  startsAt DateTime @db.Timestamptz
+  endsAt DateTime @db.Timestamptz
+  room String @default("")
+  status String @default("SCHEDULED")
+  preparation String @default("")
+  outcome String @default("")
+  decision String @default("")
+  nextHearingAt DateTime? @db.Timestamptz
+  clientVisible Boolean @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  reminders HearingReminder[]
+  @@unique([tenantId,id])
+  @@index([tenantId,startsAt])
+}
+model HearingReminder {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  hearingId String @db.Uuid
+  hearing Hearing @relation(fields:[tenantId,hearingId],references:[tenantId,id],onUpdate:NoAction)
+  memberId String @db.Uuid
+  dueAt DateTime @db.Timestamptz
+  readAt DateTime? @db.Timestamptz
+  @@unique([tenantId,hearingId,dueAt])
+  @@index([tenantId,memberId,dueAt])
+}
+model WorkTask {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  assignedTo String @db.Uuid
+  title String
+  description String @default("")
+  status String @default("TODO")
+  priority String @default("NORMAL")
+  dueAt DateTime @db.Timestamptz
+  completedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  @@index([tenantId,dueAt])
+}
+model MatterNote {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  authorId String @db.Uuid
+  body String
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,matterId])
+}
+model MatterEvent {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  matterId String @db.Uuid
+  matter Matter @relation(fields:[tenantId,matterId],references:[tenantId,id],onUpdate:NoAction)
+  actorId String @db.Uuid
+  action String
+  details Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  @@index([tenantId,matterId,createdAt])
+}
+model RateBucket {
+  key String @id
+  count Int
+  expiresAt DateTime @db.Timestamptz
+}

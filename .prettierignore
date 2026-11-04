@@ -1,0 +1,9 @@
+node_modules
+.local
+**/generated
+**/.next
+**/dist
+docs/MASTER_PROMPT.ar.md
+package-lock.json
+test-results
+.env*
