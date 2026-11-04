@@ -98,6 +98,7 @@ sequenceDiagram
 | مكتب BHD | `bhd-office` | `https://baitak.bhd-om.com` | `https://baitak.bhd-om.com/api/auth/bhd/callback` |
 | بيتك | `bhd-baitak` | `https://baitak.bhd-om.com` | `https://baitak.bhd-om.com/api/auth/bhd/callback` |
 | BHD R | `bhd-r` | `https://r.bhd-om.com` / `https://bhd-r-api-phi.vercel.app` | `{origin}/api/auth/bhd/callback` |
+| المكتب القانوني | `bhd-legal` | `https://legal-office-web.vercel.app` | `https://legal-office-web.vercel.app/api/auth/bhd/callback` |
 
 محلياً لكل منتج:
 
