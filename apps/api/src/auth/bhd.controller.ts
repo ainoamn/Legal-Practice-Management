@@ -28,6 +28,7 @@ import {
   decodeOauthStateCookie,
   encodeOauthStateCookie,
   identitySessionMaxAgeSec,
+  isBhdAuthorizeReady,
   isBhdIdentityReady,
   isSafeReturnTo,
   oauthStateCookieOptions,
@@ -49,6 +50,7 @@ export class BhdController {
   ready() {
     return {
       ready: isBhdIdentityReady(),
+      authorizeReady: isBhdAuthorizeReady(),
       issuer: bhdIdentityIssuer(),
       clientId: bhdOauthClientId(),
     };
@@ -60,7 +62,7 @@ export class BhdController {
     @Res() res: Response,
     @Query("returnTo") returnTo?: string,
   ) {
-    if (!isBhdIdentityReady()) {
+    if (!isBhdAuthorizeReady()) {
       return res.redirect("/?error=bhd_not_configured");
     }
     const origin = requestOrigin(req);

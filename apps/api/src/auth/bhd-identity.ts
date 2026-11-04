@@ -22,8 +22,14 @@ export type BhdIdClaims = {
   picture: string | null;
 };
 
+/** يكفي لبدء تحويل OAuth (authorize). */
+export function isBhdAuthorizeReady() {
+  return Boolean(bhdIdentityIssuer() && bhdOauthClientId());
+}
+
+/** يلزم سر العميل لتبادل الرمز وإصدار جلسة المنتج. */
 export function isBhdIdentityReady() {
-  return Boolean(bhdIdentityIssuer() && bhdOauthClientId() && bhdOauthClientSecret());
+  return Boolean(isBhdAuthorizeReady() && bhdOauthClientSecret());
 }
 
 export function bhdIdentityIssuer() {

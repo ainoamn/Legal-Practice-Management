@@ -5,224 +5,206 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowUpLeft,
+  Building2,
   CalendarDays,
   FileText,
-  Globe,
   Scale,
   ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
+import {
+  BhdMarketingChrome,
+  SSO_START,
+} from "../bhd/BhdMarketingChrome";
 import { BhdSiteFooter } from "../bhd/BhdSiteFooter";
 
-const FEATURES = [
+const PILLARS = [
   {
     icon: Scale,
-    ar: { title: "إدارة القضايا", text: "ملفات، جلسات، ومهام الفريق في مساحة واحدة." },
-    en: { title: "Matter control", text: "Files, hearings, and team tasks in one workspace." },
-  },
-  {
-    icon: FileText,
-    ar: { title: "الوثائق والعقود", text: "أرشفة آمنة، نسخ، وتصدير بضوابط صلاحيات." },
-    en: { title: "Documents", text: "Secure vault, versions, and exports with permissions." },
+    ar: { t: "القضايا", d: "ملف القضية، الأطراف، الحالة، والمهام في مسار واحد." },
+    en: { t: "Matters", d: "Case file, parties, status, and tasks on one track." },
   },
   {
     icon: CalendarDays,
-    ar: { title: "التقويم القضائي", text: "جلسات ومواعيد بلا تعارض، بتوقيت مسقط." },
-    en: { title: "Court calendar", text: "Hearings without conflicts, Muscat timezone." },
+    ar: { t: "الجلسات", d: "تقويم بلا تعارض، بتنبيه الفريق قبل الموعد." },
+    en: { t: "Hearings", d: "Conflict-aware calendar with team reminders." },
+  },
+  {
+    icon: FileText,
+    ar: { t: "الوثائق", d: "أرشيف محمي بصلاحيات ونسخ وتتبع." },
+    en: { t: "Documents", d: "Protected vault with versions and audit." },
   },
   {
     icon: Users,
-    ar: { title: "الفريق والأدوار", text: "صلاحيات دقيقة لكل محامٍ وموظف وعميل." },
-    en: { title: "Team & roles", text: "Precise permissions for lawyers, staff, and clients." },
-  },
-] as const;
-
-const GALLERY = [
-  {
-    src: "/marketing/hero-dashboard.jpg",
-    ar: "لوحة المكتب",
-    en: "Office dashboard",
-  },
-  {
-    src: "/marketing/matters-ui.jpg",
-    ar: "القضايا والجلسات",
-    en: "Matters & hearings",
-  },
-  {
-    src: "/marketing/finance-docs-ui.jpg",
-    ar: "المالية والوثائق",
-    en: "Finance & documents",
+    ar: { t: "الفريق", d: "أدوار دقيقة للمحامي والموظف والعميل." },
+    en: { t: "Team", d: "Precise roles for counsel, staff, and clients." },
   },
 ] as const;
 
 export function LandingPage() {
   const [locale, setLocale] = useState<"ar" | "en">("ar");
-  const [visible, setVisible] = useState(false);
+  const [ready, setReady] = useState(false);
   const isAr = locale === "ar";
 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
-    const id = window.requestAnimationFrame(() => setVisible(true));
+    const id = window.requestAnimationFrame(() => setReady(true));
     return () => window.cancelAnimationFrame(id);
   }, [locale]);
 
   return (
-    <div className={`landing ${visible ? "is-ready" : ""}`}>
-      <header className="landing-top">
-        <Link href="/" className="landing-brand" prefetch>
-          <span className="landing-brand-mark" aria-hidden>
-            <Scale size={22} />
+    <div className={`legal-home ${ready ? "is-live" : ""}`}>
+      <div className="legal-flag" aria-hidden="true" />
+
+      <BhdMarketingChrome
+        locale={locale}
+        onLocaleChange={setLocale}
+        brandMark={
+          <span className="legal-home-mark" aria-hidden>
+            <Scale size={20} />
           </span>
-          <span>
-            LEGAL OFFICE AI
+        }
+        brand={
+          <span className="legal-home-brand-text">
+            <strong>LEGAL OFFICE AI</strong>
             <small>{isAr ? "مساحة المكتب القانوني" : "Legal practice workspace"}</small>
           </span>
-        </Link>
-        <nav className="landing-nav" aria-label={isAr ? "التنقل" : "Navigation"}>
-          <a href="#inside">{isAr ? "من الداخل" : "Inside"}</a>
-          <a href="#capabilities">{isAr ? "القدرات" : "Capabilities"}</a>
-          <button
-            type="button"
-            className="icon-button"
-            onClick={() => setLocale(isAr ? "en" : "ar")}
-            aria-label={isAr ? "English" : "العربية"}
-          >
-            <Globe size={17} />
-            <span>{isAr ? "EN" : "ع"}</span>
-          </button>
-          <Link className="secondary" href="/app" prefetch>
-            {isAr ? "دخول المكتب" : "Office login"}
-          </Link>
-          <Link className="primary" href="/app" prefetch>
-            {isAr ? "ابدأ الآن" : "Get started"}
-            <ArrowUpLeft size={17} />
-          </Link>
-        </nav>
-      </header>
+        }
+      />
 
-      <section className="landing-hero">
-        <div className="landing-hero-copy">
-          <p className="landing-kicker">
-            <Sparkles size={16} />
-            {isAr ? "منصة بن حمود للمكاتب القانونية" : "Bin Hamood legal offices platform"}
-          </p>
-          <h1>
-            {isAr
-              ? "مكتبك القانوني… منظّم، آمن، وجاهز للعمل"
-              : "Your law office—organized, secure, ready"}
-          </h1>
-          <p className="landing-lead">
-            {isAr
-              ? "إدارة القضايا والجلسات والوثائق والمالية والفريق في مساحة واحدة مبنية لعُمان، مع عزل كامل بين المكاتب وصلاحيات دقيقة."
-              : "Matters, hearings, documents, finance, and team in one Oman-first workspace with strict office isolation."}
-          </p>
-          <div className="landing-cta">
-            <Link className="primary landing-cta-main" href="/app" prefetch>
-              {isAr ? "ادخل مساحة المكتب" : "Enter workspace"}
-              <ArrowUpLeft size={18} />
-            </Link>
-            <a className="secondary" href="#inside">
-              {isAr ? "شاهد النظام من الداخل" : "See inside the product"}
-            </a>
-          </div>
-          <div className="landing-trust">
-            <ShieldCheck size={20} />
-            <span>
-              {isAr
-                ? "عزل المستأجرين · سجل تدقيق · جلسات محمية · هوية بن حمود"
-                : "Tenant isolation · audit trail · protected sessions · BHD Identity"}
-            </span>
-          </div>
-        </div>
-        <div className="landing-hero-visual" aria-hidden={false}>
-          <div className="landing-hero-glow" />
+      <section className="legal-hero">
+        <div className="legal-hero-media" aria-hidden="true">
           <Image
             src="/marketing/hero-dashboard.jpg"
-            alt={
-              isAr
-                ? "لقطة من لوحة تحكم المكتب القانوني"
-                : "Legal office dashboard preview"
-            }
-            width={1600}
-            height={900}
+            alt=""
+            fill
             priority
-            className="landing-hero-shot"
+            sizes="100vw"
+            className="legal-hero-photo"
           />
+          <div className="legal-hero-veil" />
+          <div className="legal-hero-grain" />
+        </div>
+
+        <div className="legal-hero-stage">
+          <p className="legal-hero-brand">LEGAL OFFICE AI</p>
+          <h1>
+            {isAr
+              ? "مساحة عمل المكتب القانوني… كما يجب أن تكون"
+              : "The law office workspace—as it should be"}
+          </h1>
+          <p className="legal-hero-lead">
+            {isAr
+              ? "قضايا، جلسات، وثائق، مالية، وفريق — في منصة بن حمود، بعزل صارم بين المكاتب ودخول موحّد."
+              : "Matters, hearings, documents, finance, and team—on Bin Hamood, with strict office isolation and unified sign-in."}
+          </p>
+          <div className="legal-hero-actions">
+            <a className="legal-btn-primary" href={SSO_START}>
+              {isAr ? "تسجيل الدخول بحساب بن حمود" : "Sign in with Bin Hamood"}
+              <ArrowUpLeft size={18} />
+            </a>
+            <Link className="legal-btn-ghost" href="/app" prefetch>
+              <Building2 size={17} />
+              {isAr ? "دخول حساب المكتب" : "Office account login"}
+            </Link>
+          </div>
+          <p className="legal-hero-note">
+            <ShieldCheck size={16} />
+            {isAr
+              ? "هوية بن حمود · جلسة موحّدة · عزل المستأجرين · سجل تدقيق"
+              : "BHD Identity · unified session · tenant isolation · audit trail"}
+          </p>
         </div>
       </section>
 
-      <section className="landing-section" id="capabilities">
-        <div className="landing-section-head">
-          <h2>{isAr ? "كل ما يحتاجه المكتب" : "Everything the office needs"}</h2>
-          <p>
+      <section className="legal-band" id="capabilities">
+        <div className="legal-band-head">
+          <p className="legal-eyebrow">{isAr ? "القدرات" : "Capabilities"}</p>
+          <h2>
             {isAr
-              ? "من أول تسجيل دخول إلى إغلاق الجلسة — مساحة عمل واحدة."
-              : "From first sign-in to closing the hearing—one workspace."}
-          </p>
+              ? "كل مسار المكتب في إيقاع واحد"
+              : "The whole office rhythm, in one beat"}
+          </h2>
         </div>
-        <div className="landing-features">
-          {FEATURES.map((item) => {
+        <div className="legal-pillars">
+          {PILLARS.map((item) => {
             const Icon = item.icon;
             const copy = isAr ? item.ar : item.en;
             return (
-              <article key={copy.title} className="landing-feature">
-                <span className="landing-feature-icon">
-                  <Icon size={22} />
-                </span>
-                <h3>{copy.title}</h3>
-                <p>{copy.text}</p>
+              <article key={copy.t} className="legal-pillar">
+                <Icon size={26} strokeWidth={1.6} />
+                <h3>{copy.t}</h3>
+                <p>{copy.d}</p>
               </article>
             );
           })}
         </div>
       </section>
 
-      <section className="landing-section landing-inside" id="inside">
-        <div className="landing-section-head">
-          <h2>{isAr ? "من داخل النظام" : "Inside the product"}</h2>
-          <p>
-            {isAr
-              ? "واجهات حقيقية لمساحة العمل — قضايا، جلسات، مالية، ووثائق."
-              : "Real workspace views—matters, hearings, finance, and documents."}
-          </p>
+      <section className="legal-cinema" id="inside">
+        <div className="legal-band-head">
+          <p className="legal-eyebrow">{isAr ? "من الداخل" : "Inside"}</p>
+          <h2>
+            {isAr ? "شاهد مساحة العمل كما يستخدمها المكتب" : "See the workspace as offices use it"}
+          </h2>
         </div>
-        <div className="landing-gallery">
-          {GALLERY.map((shot, index) => (
-            <figure
-              key={shot.src}
-              className={`landing-shot ${index === 0 ? "is-wide" : ""}`}
-            >
-              <Image
-                src={shot.src}
-                alt={isAr ? shot.ar : shot.en}
-                width={1600}
-                height={900}
-                sizes="(max-width: 900px) 100vw, 50vw"
-              />
-              <figcaption>{isAr ? shot.ar : shot.en}</figcaption>
-            </figure>
-          ))}
+        <div className="legal-frames">
+          <figure className="legal-frame is-lead">
+            <Image
+              src="/marketing/hero-dashboard.jpg"
+              alt={isAr ? "لوحة المكتب" : "Office dashboard"}
+              width={1600}
+              height={900}
+              sizes="(max-width: 900px) 100vw, 70vw"
+            />
+            <figcaption>{isAr ? "لوحة المكتب" : "Dashboard"}</figcaption>
+          </figure>
+          <figure className="legal-frame">
+            <Image
+              src="/marketing/matters-ui.jpg"
+              alt={isAr ? "القضايا والجلسات" : "Matters"}
+              width={1600}
+              height={900}
+              sizes="(max-width: 900px) 100vw, 40vw"
+            />
+            <figcaption>{isAr ? "القضايا والجلسات" : "Matters & hearings"}</figcaption>
+          </figure>
+          <figure className="legal-frame">
+            <Image
+              src="/marketing/finance-docs-ui.jpg"
+              alt={isAr ? "المالية والوثائق" : "Finance"}
+              width={1600}
+              height={900}
+              sizes="(max-width: 900px) 100vw, 40vw"
+            />
+            <figcaption>{isAr ? "المالية والوثائق" : "Finance & documents"}</figcaption>
+          </figure>
         </div>
       </section>
 
-      <section className="landing-section landing-close">
-        <div className="landing-close-panel">
+      <section className="legal-sso">
+        <div className="legal-sso-panel">
+          <p className="legal-eyebrow">{isAr ? "الدخول الموحّد" : "Unified login"}</p>
           <h2>
             {isAr
-              ? "جاهز لمكتبك في مسقط وخارجها"
-              : "Ready for offices in Muscat and beyond"}
+              ? "حساب بن حمود واحد… لكل برامج المجموعة"
+              : "One Bin Hamood account across the suite"}
           </h2>
           <p>
             {isAr
-              ? "ادخل الآن، أنشئ مكتبك، وادعُ فريقك بأدوار واضحة."
-              : "Sign in, create your office, and invite your team with clear roles."}
+              ? "ادخل من هنا، أو من مشغّل التطبيقات في الهيدر، أو من أي منتج في المنظومة — نفس الهوية، نفس الجلسة."
+              : "Sign in here, from the header app launcher, or any suite product—same identity, same session."}
           </p>
-          <Link className="primary landing-cta-main" href="/app" prefetch>
-            {isAr ? "الانتقال إلى الدخول" : "Go to sign-in"}
-            <ArrowUpLeft size={18} />
-          </Link>
+          <div className="legal-hero-actions">
+            <a className="legal-btn-primary" href={SSO_START}>
+              {isAr ? "المتابعة إلى الهوية" : "Continue to Identity"}
+              <ArrowUpLeft size={18} />
+            </a>
+            <Link className="legal-btn-ghost" href="/app" prefetch>
+              {isAr ? "حساب المكتب المحلي" : "Local office account"}
+            </Link>
+          </div>
         </div>
       </section>
 

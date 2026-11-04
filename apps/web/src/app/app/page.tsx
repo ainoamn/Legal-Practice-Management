@@ -46,6 +46,7 @@ import { FinanceConsole } from "../../components/finance-console";
 import { InstrumentsConsole } from "../../components/instruments-console";
 import { CalendarConsole } from "../../components/calendar-console";
 import { BhdAppSwitcher } from "../../components/bhd/BhdAppSwitcher";
+import { BhdMarketingChrome } from "../../components/bhd/BhdMarketingChrome";
 import { BhdSiteFooter } from "../../components/bhd/BhdSiteFooter";
 import {
   api,
@@ -411,17 +412,24 @@ export default function Home() {
   if (!me)
     return (
       <>
+      <BhdMarketingChrome
+        locale={locale}
+        onLocaleChange={setLocale}
+        brandHref="/"
+        brandMark={
+          <span className="brand-icon" style={{ width: 42, height: 42 }}>
+            <Scale size={20} />
+          </span>
+        }
+        brand={
+          <span>
+            {t.brand}
+            <small>{t.tagline}</small>
+          </span>
+        }
+      />
       <main className="auth-shell">
         <section className="auth-story">
-          <a className="brand" href="/" style={{ textDecoration: "none", color: "inherit" }}>
-            <span className="brand-icon">
-              <Scale />
-            </span>
-            <span>
-              {t.brand}
-              <small>{t.tagline}</small>
-            </span>
-          </a>
           <div className="story-copy">
             <span className="eyebrow">{t.phase}</span>
             <h1>{t.intro}</h1>
@@ -438,7 +446,15 @@ export default function Home() {
           <p className="phase-note">{t.notReady}</p>
         </section>
         <section className="auth-panel">
-          {controls}
+          <div className="utility" style={{ justifyContent: "flex-end" }}>
+            <button
+              className="icon-button"
+              onClick={() => setDark(!dark)}
+              aria-label={dark ? t.light : t.dark}
+            >
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
           <div className="auth-card">
             {recoverOpen ? (
               <PasswordRecovery
@@ -456,19 +472,25 @@ export default function Home() {
                 </div>
                 <h2>{mode === "login" ? t.login : t.register}</h2>
                 <p className="muted">{t.foundation}</p>
-                {bhdReady && mode === "login" ? (
+                {mode === "login" ? (
                   <>
                     <a
                       className="primary full"
                       href="/api/auth/bhd/start?returnTo=%2Fapp"
                     >
                       {locale === "ar"
-                        ? "الدخول بحساب بن حمود"
+                        ? "تسجيل الدخول بحساب بن حمود"
                         : "Sign in with Bin Hamood"}
                       <ArrowUpLeft size={17} />
                     </a>
                     <p className="muted" style={{ textAlign: "center" }}>
-                      {locale === "ar" ? "أو حساب المكتب" : "or office account"}
+                      {locale === "ar"
+                        ? bhdReady
+                          ? "أو حساب المكتب المحلي"
+                          : "الدخول الموحّد متاح — أكمل من هوية بن حمود، أو استخدم حساب المكتب أدناه"
+                        : bhdReady
+                          ? "or local office account"
+                          : "Unified login opens Bin Hamood Identity — or use the office account below"}
                     </p>
                   </>
                 ) : null}
