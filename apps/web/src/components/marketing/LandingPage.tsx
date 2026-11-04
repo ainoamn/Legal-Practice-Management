@@ -10,6 +10,7 @@ import {
   FileText,
   Scale,
   ShieldCheck,
+  Sparkles,
   Users,
   X,
 } from "lucide-react";
@@ -21,76 +22,52 @@ import { BhdSiteFooter } from "../bhd/BhdSiteFooter";
 
 const FEATURES = [
   {
-    n: "01",
     icon: Scale,
-    ar: {
-      t: "قضية واحدة… مسار واحد",
-      d: "الأطراف والحالة والمهام والملاحظات في ملف يتسع للمكتب كله دون فوضى الجداول.",
-    },
-    en: {
-      t: "One matter, one path",
-      d: "Parties, status, tasks, and notes in a single file—without spreadsheet chaos.",
-    },
+    ar: { t: "إدارة القضايا", d: "ملف واحد للأطراف والحالة والمهام والملاحظات." },
+    en: { t: "Matter control", d: "One file for parties, status, tasks, and notes." },
   },
   {
-    n: "02",
     icon: CalendarDays,
-    ar: {
-      t: "الجلسة قبل أن تُنسى",
-      d: "تقويم قضائي بتوقيت مسقط، وتنبيه يصل للفريق قبل الموعد لا بعده.",
-    },
-    en: {
-      t: "Hearings remembered",
-      d: "Muscat-time court calendar, with reminders that arrive before the hearing.",
-    },
+    ar: { t: "التقويم القضائي", d: "جلسات بتوقيت مسقط وتنبيهات قبل الموعد." },
+    en: { t: "Court calendar", d: "Muscat-time hearings with reminders before the day." },
   },
   {
-    n: "03",
     icon: FileText,
-    ar: {
-      t: "وثيقة لها حارس",
-      d: "أرشيف بنسخ وصلاحيات؛ من لا يملك الحق لا يرى الملف أصلاً.",
-    },
-    en: {
-      t: "Documents with a guard",
-      d: "Versioned vault with permissions—if you lack access, the file stays invisible.",
-    },
+    ar: { t: "الوثائق والعقود", d: "أرشيف بنسخ وصلاحيات؛ من لا يملك الحق لا يرى الملف." },
+    en: { t: "Documents", d: "Versioned vault with permissions—no access, no file." },
   },
   {
-    n: "04",
     icon: Users,
-    ar: {
-      t: "أدوار لا تلتبس",
-      d: "محامٍ وموظف وعميل — كلٌّ على مساحته داخل المكتب نفسه.",
-    },
-    en: {
-      t: "Roles that stay clear",
-      d: "Counsel, staff, client—each on their own plane inside the same office.",
-    },
+    ar: { t: "الفريق والأدوار", d: "محامٍ وموظف وعميل — كلٌّ على مساحته داخل المكتب." },
+    en: { t: "Team & roles", d: "Counsel, staff, client—each on their own plane." },
   },
   {
-    n: "05",
     icon: ShieldCheck,
-    ar: {
-      t: "عزل لا يُخترق",
-      d: "مستأجرون منفصلون، سجل تدقيق، وهوية بن حمود لجلسة موحّدة.",
-    },
-    en: {
-      t: "Isolation that holds",
-      d: "Separate tenants, audit trail, and Bin Hamood identity for one session.",
-    },
+    ar: { t: "عزل المكاتب", d: "مستأجرون منفصلون وسجل تدقيق وهوية بن حمود موحّدة." },
+    en: { t: "Office isolation", d: "Separate tenants, audit trail, and Bin Hamood SSO." },
   },
   {
-    n: "06",
     icon: Building2,
-    ar: {
-      t: "مالية مربوطة بالقضية",
-      d: "فواتير ومصروفات تظهر حيث يعمل الفريق — لا في جدول منفصل.",
-    },
-    en: {
-      t: "Finance tied to the matter",
-      d: "Invoices and expenses live where the team works—not in a side spreadsheet.",
-    },
+    ar: { t: "مالية المكتب", d: "فواتير ومصروفات مربوطة بالقضايا في مساحة واحدة." },
+    en: { t: "Practice finance", d: "Invoices and expenses linked to matters in one place." },
+  },
+] as const;
+
+const SHOTS = [
+  {
+    src: "/marketing/hero-dashboard.jpg",
+    ar: "لوحة المكتب",
+    en: "Office dashboard",
+  },
+  {
+    src: "/marketing/matters-ui.jpg",
+    ar: "القضايا والجلسات",
+    en: "Matters & hearings",
+  },
+  {
+    src: "/marketing/finance-docs-ui.jpg",
+    ar: "المالية والوثائق",
+    en: "Finance & documents",
   },
 ] as const;
 
@@ -131,23 +108,28 @@ export function LandingPage() {
   }, [locale]);
 
   return (
-    <div className={`lo ${ready ? "is-live" : ""}`}>
+    <div className={`lo-home ${ready ? "is-live" : ""}`}>
       <div className="lo-flag" aria-hidden="true" />
 
       <BhdMarketingChrome
         locale={locale}
         onLocaleChange={setLocale}
         brandMark={
-          <span className="lo-seal" aria-hidden>
+          <span className="lo-mark" aria-hidden>
             <Scale size={18} />
           </span>
         }
-        brand={<strong className="lo-chrome-name">LEGAL OFFICE AI</strong>}
+        brand={
+          <span className="lo-brand-copy">
+            <strong>LEGAL OFFICE AI</strong>
+            <small>{isAr ? "المكتب القانوني" : "Legal Office"}</small>
+          </span>
+        }
       />
 
       {authError ? (
-        <div className="lo-alert" role="alert">
-          <p>{authError}</p>
+        <div className="lo-banner" role="alert">
+          <span>{authError}</span>
           <button type="button" onClick={() => setAuthError("")} aria-label="Close">
             <X size={16} />
           </button>
@@ -155,137 +137,126 @@ export function LandingPage() {
       ) : null}
 
       <section className="lo-hero">
-        <div className="lo-hero-bg" aria-hidden="true">
-          <Image
-            src="/marketing/chamber-hero.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="lo-hero-photo"
-          />
-          <div className="lo-hero-veil" />
-        </div>
-
-        <div className="lo-hero-core">
-          <p className="lo-eyebrow">
-            {isAr ? "منصة بن حمود · عُمان" : "Bin Hamood · Oman"}
+        <div className="lo-hero-copy">
+          <p className="lo-badge">
+            <Sparkles size={14} />
+            {isAr ? "منصة بن حمود للمكاتب القانونية" : "Bin Hamood for law offices"}
           </p>
-          <p className="lo-display-brand">LEGAL OFFICE AI</p>
           <h1>
             {isAr ? (
               <>
-                مكتبك القانوني
-                <span>بوضوحٍ يُشبه الصباح</span>
+                مكتبك القانوني،{" "}
+                <span>مرتّب ومحمي بوضوح</span>
               </>
             ) : (
               <>
-                Your law office
-                <span>with morning clarity</span>
+                Your law office,{" "}
+                <span>ordered and protected</span>
               </>
             )}
           </h1>
           <p className="lo-lead">
             {isAr
-              ? "قضايا، جلسات، وثائق، مالية، وفريق — في مساحة واحدة بهوية بن حمود ودخول موحّد."
+              ? "قضايا وجلسات ووثائق ومالية وفريق — في مساحة واحدة بهوية بن حمود ودخول موحّد."
               : "Matters, hearings, documents, finance, and team—in one workspace with Bin Hamood sign-in."}
           </p>
-          <div className="lo-cta">
-            <a className="lo-primary" href={SSO_START}>
+          <div className="lo-actions">
+            <a className="lo-btn-main" href={SSO_START}>
               {isAr ? "دخول بحساب بن حمود" : "Sign in with Bin Hamood"}
               <ArrowUpLeft size={18} />
             </a>
-            <a className="lo-secondary" href="#inside">
-              {isAr ? "استكشف من الداخل" : "Explore inside"}
+            <a className="lo-btn-soft" href="#inside">
+              {isAr ? "شاهد من الداخل" : "See inside"}
             </a>
           </div>
+          <p className="lo-trust">
+            {isAr
+              ? "مجانية للتجربة · بلا بطاقة · بيانات مكتبك ملكك"
+              : "Try free · no card · your office data stays yours"}
+          </p>
         </div>
 
-        <div className="lo-hero-product">
-          <div className="lo-laptop">
+        <div className="lo-hero-stage">
+          <div className="lo-hero-glow" aria-hidden />
+          <div className="lo-device">
             <Image
               src="/marketing/hero-dashboard.jpg"
-              alt={isAr ? "لوحة المكتب" : "Office dashboard"}
+              alt={isAr ? "لوحة المكتب القانوني" : "Legal office dashboard"}
               width={1600}
               height={900}
               priority
+              className="lo-device-shot"
             />
           </div>
         </div>
       </section>
 
-      <section className="lo-block" id="why">
-        <div className="lo-block-intro">
-          <p className="lo-label">{isAr ? "لماذا نحن" : "Why us"}</p>
+      <section className="lo-section" id="why">
+        <div className="lo-section-head">
+          <p className="lo-label">{isAr ? "المزايا" : "Features"}</p>
           <h2>
             {isAr
-              ? "صُمم لمكتبٍ يعمل في مسقط… لا لترجمةٍ عن الغرب"
-              : "Designed for offices in Muscat—not a Western port"}
+              ? "كل ما يحتاجه المكتب… في مكان واحد"
+              : "Everything the office needs—in one place"}
           </h2>
+          <p>
+            {isAr
+              ? "صُمم لإيقاع المكتب العماني، لا لترجمة أداة غربية."
+              : "Built for how Omani offices work—not a Western tool in Arabic."}
+          </p>
         </div>
-        <ol className="lo-manifest">
+        <div className="lo-features">
           {FEATURES.map((item) => {
             const Icon = item.icon;
             const copy = isAr ? item.ar : item.en;
             return (
-              <li key={item.n} className="lo-manifest-row">
-                <span className="lo-num" aria-hidden>
-                  {item.n}
+              <article key={copy.t} className="lo-feature">
+                <span className="lo-feature-icon" aria-hidden>
+                  <Icon size={22} strokeWidth={1.6} />
                 </span>
-                <div className="lo-manifest-body">
-                  <Icon size={22} strokeWidth={1.5} />
-                  <h3>{copy.t}</h3>
-                  <p>{copy.d}</p>
-                </div>
-              </li>
+                <h3>{copy.t}</h3>
+                <p>{copy.d}</p>
+              </article>
             );
           })}
-        </ol>
+        </div>
       </section>
 
-      <section className="lo-gallery" id="inside">
-        <div className="lo-block-intro">
+      <section className="lo-showcase" id="inside">
+        <div className="lo-section-head">
           <p className="lo-label">{isAr ? "من الداخل" : "Inside"}</p>
           <h2>
-            {isAr
-              ? "المساحة كما يراها المكتب كل يوم"
-              : "The workspace as the office sees it daily"}
+            {isAr ? "المساحة كما يراها المكتب" : "The workspace as the office sees it"}
           </h2>
+          <p>
+            {isAr
+              ? "واجهات حقيقية لمساحة العمل — لا رسوم فارغة."
+              : "Real workspace views—not empty illustrations."}
+          </p>
         </div>
-        <div className="lo-gallery-grid">
-          <figure className="lo-frame lo-frame-a">
-            <Image
-              src="/marketing/matters-ui.jpg"
-              alt={isAr ? "القضايا" : "Matters"}
-              width={1400}
-              height={788}
-            />
-            <figcaption>{isAr ? "القضايا والجلسات" : "Matters & hearings"}</figcaption>
-          </figure>
-          <figure className="lo-frame lo-frame-b">
-            <Image
-              src="/marketing/finance-docs-ui.jpg"
-              alt={isAr ? "المالية" : "Finance"}
-              width={1400}
-              height={788}
-            />
-            <figcaption>{isAr ? "المالية والوثائق" : "Finance & documents"}</figcaption>
-          </figure>
-          <figure className="lo-frame lo-frame-c">
-            <Image
-              src="/marketing/atmosphere-hero.jpg"
-              alt=""
-              width={1400}
-              height={788}
-            />
-            <figcaption>{isAr ? "جو المكتب" : "Office atmosphere"}</figcaption>
-          </figure>
+        <div className="lo-shots">
+          {SHOTS.map((shot, index) => (
+            <figure
+              key={shot.src}
+              className={index === 0 ? "lo-shot lo-shot-wide" : "lo-shot"}
+            >
+              <Image
+                src={shot.src}
+                alt={isAr ? shot.ar : shot.en}
+                width={index === 0 ? 1600 : 1400}
+                height={index === 0 ? 900 : 788}
+              />
+              <figcaption>{isAr ? shot.ar : shot.en}</figcaption>
+            </figure>
+          ))}
         </div>
       </section>
 
-      <section className="lo-finale">
-        <div className="lo-finale-panel">
-          <p className="lo-label">{isAr ? "ابدأ الآن" : "Start now"}</p>
+      <section className="lo-closing">
+        <div className="lo-closing-inner">
+          <p className="lo-label lo-label-light">
+            {isAr ? "ابدأ الآن" : "Start now"}
+          </p>
           <h2>
             {isAr
               ? "حساب بن حمود واحد… ومكتبك يفتح"
@@ -296,12 +267,12 @@ export function LandingPage() {
               ? "نفس الهوية في وازن وحسابي ونَسَب وباقي برامج المجموعة."
               : "The same identity across Wazen, Hisaby, Nasab, and the suite."}
           </p>
-          <div className="lo-cta">
-            <a className="lo-primary lo-primary-light" href={SSO_START}>
+          <div className="lo-actions lo-actions-center">
+            <a className="lo-btn-main lo-btn-on-dark" href={SSO_START}>
               {isAr ? "المتابعة إلى الهوية" : "Continue to Identity"}
               <ArrowUpLeft size={18} />
             </a>
-            <Link className="lo-ghost" href="/app" prefetch>
+            <Link className="lo-btn-ghost" href="/app" prefetch>
               {isAr ? "حساب المكتب المحلي" : "Local office account"}
             </Link>
           </div>
