@@ -188,22 +188,22 @@ body:has(.lo-home) {
   color: var(--ink);
 }
 
-/* Hero — full width shell, constrained inner */
+/* Hero — starts under header, fills width, no empty top void */
 .lo-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.1fr);
   gap: clamp(24px, 4vw, 48px);
-  align-items: end;
+  align-items: center;
   width: var(--content);
   margin: 0 auto;
-  padding: clamp(28px, 5vw, 56px) 0 0;
-  min-height: calc(100svh - 68px);
+  padding: clamp(28px, 4vw, 48px) 0 clamp(36px, 5vw, 64px);
+  min-height: 0;
   box-sizing: border-box;
 }
 
 .lo-hero-copy {
   min-width: 0;
-  padding-bottom: clamp(20px, 3vw, 40px);
+  padding-bottom: 0;
 }
 
 .lo-badge {
@@ -332,14 +332,13 @@ body:has(.lo-home) {
 .lo-device {
   position: relative;
   width: 100%;
-  border-radius: 20px 20px 0 0;
+  border-radius: 20px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-bottom: 0;
   background: #0b2428;
   box-shadow:
     0 -1px 0 #ffffffaa inset,
-    0 36px 70px #0a1f2230;
+    0 28px 60px #0a1f2228;
 }
 
 .lo-home.is-live .lo-device {
@@ -639,7 +638,7 @@ body:has(.lo-home) {
   }
 
   .lo-device {
-    border-radius: 16px 16px 0 0;
+    border-radius: 16px;
   }
 }
 
