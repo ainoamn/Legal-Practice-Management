@@ -12,8 +12,16 @@ const config: NextConfig = {
       process.env.INTERNAL_API_URL ?? "http://127.0.0.1:4311";
     return [
       {
-        source: "/api/auth/bhd/:path*",
-        destination: `${api}/api/v1/auth/bhd/:path*`,
+        source: "/api/auth/bhd/ready",
+        destination: `${api}/api/v1/auth/bhd/ready`,
+      },
+      {
+        source: "/api/auth/bhd/logout",
+        destination: `${api}/api/v1/auth/bhd/logout`,
+      },
+      {
+        source: "/api/auth/bhd/rebind",
+        destination: `${api}/api/v1/auth/bhd/rebind`,
       },
       {
         source: "/api/v1/:path*",
