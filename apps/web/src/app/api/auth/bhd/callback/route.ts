@@ -12,6 +12,8 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const SESSION_COOKIE = "legal_session";
+
 function clearState(response: NextResponse, secure: boolean) {
   response.cookies.set({
     name: BHD_OAUTH_STATE_COOKIE,
@@ -82,20 +84,32 @@ export async function GET(request: NextRequest) {
       return fail(request, "bhd_callback", secure);
     }
 
+    const payload = (await rebind.json()) as {
+      ok?: boolean;
+      sessionToken?: string;
+      expiresAt?: string;
+      maxAgeSec?: number;
+    };
+    if (!payload.sessionToken) return fail(request, "bhd_callback", secure);
+
     const dest = isSafeReturnTo(saved.returnTo) ? saved.returnTo : "/app";
     const response = NextResponse.redirect(new URL(dest, origin));
     clearState(response, secure);
 
-    const setCookies =
-      typeof rebind.headers.getSetCookie === "function"
-        ? rebind.headers.getSetCookie()
-        : [];
-    if (setCookies.length) {
-      for (const item of setCookies) response.headers.append("Set-Cookie", item);
-    } else {
-      const single = rebind.headers.get("set-cookie");
-      if (single) response.headers.append("Set-Cookie", single);
-    }
+    const maxAge =
+      typeof payload.maxAgeSec === "number" && payload.maxAgeSec >= 3600
+        ? payload.maxAgeSec
+        : 12 * 3600;
+    response.cookies.set({
+      name: SESSION_COOKIE,
+      value: payload.sessionToken,
+      httpOnly: true,
+      secure,
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+      expires: payload.expiresAt ? new Date(payload.expiresAt) : undefined,
+    });
     return response;
   } catch {
     return fail(request, "bhd_callback", secure);

@@ -247,17 +247,22 @@ export class BhdController {
       userId,
       req.headers["user-agent"] ?? "",
     );
+    const maxAgeSec = await identitySessionMaxAgeSec();
     res.cookie(COOKIE, session.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       expires: session.expiresAt,
+      maxAge: maxAgeSec,
     });
     return {
       ok: true,
       tenantSlug: session.tenantSlug,
-      maxAgeSec: await identitySessionMaxAgeSec(),
+      maxAgeSec,
+      // Used by Next callback on a different host to mint the first-party session cookie.
+      sessionToken: session.token,
+      expiresAt: session.expiresAt.toISOString(),
     };
   }
 }

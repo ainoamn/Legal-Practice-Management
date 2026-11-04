@@ -2,14 +2,25 @@ import {
   Injectable,
   Inject,
   UnauthorizedException,
-  BadRequestException,
 } from "@nestjs/common";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { db, inTenant } from "../../../../packages/database/src/index.js";
+import { initialRoles } from "../../../../packages/contracts/src/index.js";
 import { AuthService } from "./auth.service.js";
 import { hashPassword } from "./password.js";
 import type { BhdIdClaims } from "./bhd-identity.js";
 import { identitySessionMaxAgeSec } from "./bhd-identity.js";
+
+function officeSlugFromIdentity(email: string, fullName: string) {
+  const local = email.split("@")[0] ?? "office";
+  const raw = `${fullName}-${local}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+  const base = raw.length >= 3 ? raw : `office-${local.replace(/[^a-z0-9]/g, "").slice(0, 20) || "bhd"}`;
+  return base.slice(0, 48);
+}
 
 @Injectable()
 export class BhdService {
@@ -54,17 +65,82 @@ export class BhdService {
     return created.id;
   }
 
+  /** First SSO visit: open a personal office so the user can enter the workspace. */
+  private async ensurePersonalOffice(userId: string) {
+    const existing = await db.membership.findFirst({
+      where: { userId, active: true },
+      select: { id: true },
+    });
+    if (existing) return;
+
+    const user = await db.user.findUniqueOrThrow({ where: { id: userId } });
+    const country =
+      (await db.country.findFirst({ where: { code: "OM", enabled: true } })) ??
+      (await db.country.findFirst({ where: { enabled: true } }));
+    if (!country) throw new UnauthorizedException("COUNTRY_UNAVAILABLE");
+
+    const officeName = `${user.fullName} — مكتب قانوني`.slice(0, 120);
+    let slug = officeSlugFromIdentity(user.email, user.fullName);
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const candidate = attempt === 0 ? slug : `${slug}-${attempt + 1}`;
+      const taken = await db.officeDirectory.findUnique({
+        where: { slug: candidate },
+      });
+      if (!taken) {
+        slug = candidate;
+        break;
+      }
+      if (attempt === 7) slug = `office-${randomUUID().slice(0, 8)}`;
+    }
+
+    const tenantId = randomUUID();
+    await inTenant(tenantId, async (tx) => {
+      await tx.tenant.create({
+        data: {
+          id: tenantId,
+          name: officeName,
+          slug,
+          countryCode: country.code,
+          currency: country.currency,
+          timezone: country.timezone,
+        },
+      });
+      await tx.officeDirectory.create({ data: { tenantId, slug } });
+      const branch = await tx.branch.create({
+        data: { tenantId, name: officeName },
+      });
+      let ownerRoleId = "";
+      for (const role of initialRoles) {
+        const created = await tx.role.create({ data: { tenantId, ...role } });
+        if (role.key === "OWNER") ownerRoleId = created.id;
+      }
+      await tx.membership.create({
+        data: {
+          tenantId,
+          userId,
+          roleId: ownerRoleId,
+          branchId: branch.id,
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          tenantId,
+          actorId: userId,
+          action: "office.provisioned.bhd",
+          resourceId: tenantId,
+        },
+      });
+    });
+  }
+
   async issueForUser(userId: string, userAgent: string, slug?: string) {
+    await this.ensurePersonalOffice(userId);
     const memberships = await db.membership.findMany({
       where: { userId, active: true },
       orderBy: { createdAt: "asc" },
       include: { tenant: true },
     });
-    if (!memberships.length) {
-      const err = new BadRequestException("NO_OFFICE_MEMBERSHIP");
-      (err as Error & { code?: string }).code = "NO_OFFICE_MEMBERSHIP";
-      throw err;
-    }
+    if (!memberships.length) throw new UnauthorizedException("OFFICE_PROVISION_FAILED");
     const preferred = slug
       ? memberships.find((item) => item.tenant.slug === slug)
       : undefined;
