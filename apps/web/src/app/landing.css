@@ -5,6 +5,8 @@ body:has(.lo-home) {
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .lo-home {
@@ -16,8 +18,8 @@ body:has(.lo-home) {
   --line: #d5e6e7;
   --paper: #f4f9f9;
   --card: #ffffff;
-  --pad: clamp(16px, 4vw, 48px);
-  --content: min(1120px, calc(100% - 2 * var(--pad)));
+  --pad: clamp(16px, 4vw, 56px);
+  --content: min(1280px, calc(100% - 2 * var(--pad)));
   width: 100%;
   min-width: 0;
   min-height: 100svh;
@@ -222,8 +224,8 @@ body:has(.lo-home) {
 .lo-hero h1 {
   margin: 0 0 16px;
   width: 100%;
-  max-width: 18ch;
-  font-size: clamp(1.85rem, 4.2vw, 3.35rem);
+  max-width: none;
+  font-size: clamp(1.9rem, 4.5vw, 3.5rem);
   line-height: 1.28;
   letter-spacing: -0.03em;
   font-weight: 750;
