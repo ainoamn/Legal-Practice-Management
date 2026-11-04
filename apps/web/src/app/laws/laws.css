@@ -1,0 +1,449 @@
+/* مكتبة القوانين — فهرس + قارئ كتاب + ترويسة رسمية للطباعة */
+
+.laws-shell {
+  --ink: #0a1f22;
+  --muted: #4a656b;
+  --teal: #0b8f94;
+  --teal-deep: #066266;
+  --teal-soft: #e6f5f5;
+  --line: #d5e6e7;
+  --paper: #f4f9f9;
+  --pad: clamp(16px, 4vw, 48px);
+  --content: min(1100px, calc(100% - 2 * var(--pad)));
+  min-height: 100svh;
+  background:
+    radial-gradient(900px 400px at 100% 0%, #b8e4e640, transparent 55%),
+    linear-gradient(180deg, #f7fbfb, var(--paper));
+  color: var(--ink);
+}
+
+.laws-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px var(--pad);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, #fff 88%, transparent);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.laws-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.laws-brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(145deg, #12a8ae, #066266);
+  flex: 0 0 auto;
+}
+
+.laws-brand strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.laws-brand small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.laws-top-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.laws-chip,
+.laws-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.laws-btn-primary {
+  background: var(--teal-deep);
+  border-color: var(--teal-deep);
+  color: #fff;
+}
+
+.laws-hero {
+  width: var(--content);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 48px) 0 12px;
+}
+
+.laws-hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.laws-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  max-width: 46rem;
+}
+
+.laws-note {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff8e8;
+  border: 1px solid #ecd2a6;
+  color: #6b410c;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.laws-grid {
+  width: var(--content);
+  margin: 0 auto;
+  padding: 24px 0 64px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.laws-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 18px 18px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 10px 28px #0a1f2208;
+  transition: border-color 0.2s, transform 0.2s;
+  min-height: 210px;
+}
+
+.laws-card:hover {
+  border-color: #9fd5d7;
+  transform: translateY(-2px);
+}
+
+.laws-card-cat {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--teal-soft);
+  color: var(--teal-deep);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.laws-card h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.laws-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  flex: 1;
+}
+
+.laws-card-meta {
+  color: var(--teal-deep);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+/* Reader */
+.law-reader {
+  min-height: 100svh;
+  background: #e8eeef;
+  color: var(--ink);
+}
+
+.law-reader-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px var(--pad);
+  background: #0b2428;
+  color: #e8f7f7;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.law-reader-toolbar a,
+.law-reader-toolbar button {
+  color: inherit;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #fff 22%, transparent);
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.law-reader-toolbar .is-primary {
+  background: #fff;
+  color: #066266;
+  border-color: #fff;
+}
+
+.law-reader-stage {
+  width: min(820px, calc(100% - 24px));
+  margin: 20px auto 40px;
+}
+
+.law-letter {
+  background: #fff;
+  border: 1px solid #cfd9da;
+  box-shadow: 0 18px 50px #0a1f2218;
+  min-height: 980px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.law-letter-flag {
+  height: 4px;
+  background: linear-gradient(90deg, #c8102e 0 33%, #fff 33% 66%, #008c45 66%);
+}
+
+.law-letterhead {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid #d7e4e5;
+}
+
+.law-letterhead-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(145deg, #12a8ae, #066266);
+}
+
+.law-letterhead-brand strong {
+  display: block;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+.law-letterhead-brand span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.law-letterhead-meta {
+  text-align: start;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.law-letter-title {
+  padding: 18px 28px 8px;
+  text-align: center;
+}
+
+.law-letter-title h1 {
+  margin: 0 0 6px;
+  font-size: 1.45rem;
+  line-height: 1.35;
+}
+
+.law-letter-title p {
+  margin: 0;
+  color: var(--teal-deep);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.law-letter-body {
+  padding: 8px 32px 28px;
+  flex: 1;
+}
+
+.law-chapter-label {
+  margin: 12px 0 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.law-article {
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #d7e4e5;
+}
+
+.law-article:last-child {
+  border-bottom: 0;
+}
+
+.law-article-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.law-article-num {
+  color: var(--teal-deep);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.law-article-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 750;
+}
+
+.law-article p {
+  margin: 0;
+  line-height: 2;
+  font-size: 1.02rem;
+  text-align: justify;
+}
+
+.law-letter-footer {
+  margin-top: auto;
+  padding: 12px 28px 16px;
+  border-top: 1px solid #d7e4e5;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.law-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 0 36px;
+  flex-wrap: wrap;
+}
+
+.law-pager button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.law-pager button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.law-pager span {
+  font-weight: 700;
+  color: var(--teal-deep);
+}
+
+@media (max-width: 720px) {
+  .law-letterhead {
+    grid-template-columns: auto 1fr;
+  }
+  .law-letterhead-meta {
+    grid-column: 1 / -1;
+  }
+  .law-letter-body {
+    padding: 8px 18px 22px;
+  }
+  .law-letter {
+    min-height: 720px;
+  }
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .laws-top,
+  .law-reader-toolbar,
+  .law-pager,
+  .laws-hero,
+  .laws-grid,
+  .laws-note {
+    display: none !important;
+  }
+  .law-reader {
+    background: #fff !important;
+  }
+  .law-reader-stage {
+    width: 100%;
+    margin: 0;
+  }
+  .law-letter {
+    box-shadow: none;
+    border: 0;
+    min-height: auto;
+  }
+  .law-letter-body {
+    padding: 8px 12mm 12mm;
+  }
+  .law-letterhead {
+    padding: 8mm 12mm 4mm;
+  }
+  .no-print-page {
+    display: none !important;
+  }
+  .print-only-current {
+    break-inside: avoid;
+  }
+}

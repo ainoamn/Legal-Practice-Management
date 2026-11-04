@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowUpLeft,
+  BookOpen,
   Building2,
   CalendarDays,
   FileText,
@@ -50,6 +51,11 @@ const FEATURES = [
     icon: Building2,
     ar: { t: "مالية المكتب", d: "فواتير ومصروفات مربوطة بالقضايا في مساحة واحدة." },
     en: { t: "Practice finance", d: "Invoices and expenses linked to matters in one place." },
+  },
+  {
+    icon: BookOpen,
+    ar: { t: "مكتبة القوانين", d: "قوانين عمانية للقراءة صفحة بصفحة مع ترويسة رسمية للطباعة." },
+    en: { t: "Laws library", d: "Omani laws to read page by page with an official printable letterhead." },
   },
 ] as const;
 
@@ -165,6 +171,9 @@ export function LandingPage() {
               {isAr ? "دخول بحساب بن حمود" : "Sign in with Bin Hamood"}
               <ArrowUpLeft size={18} />
             </a>
+            <Link className="lo-btn-soft" href="/laws" prefetch>
+              {isAr ? "مكتبة القوانين" : "Laws library"}
+            </Link>
             <a className="lo-btn-soft" href="#inside">
               {isAr ? "شاهد من الداخل" : "See inside"}
             </a>
