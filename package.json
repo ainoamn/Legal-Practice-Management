@@ -72,5 +72,13 @@
   },
   "overrides": {
     "minimatch": "11.0.4"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "prisma@7.10.1": true,
+    "argon2@0.45.2": true,
+    "msgpackr-extract@3.0.6": true,
+    "@scarf/scarf@1.4.0": false,
+    "esbuild@0.28.2": true
   }
 }

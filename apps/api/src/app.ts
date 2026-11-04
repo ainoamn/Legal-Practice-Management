@@ -11,7 +11,8 @@ import {
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { SwaggerModule, DocumentBuilder, ApiTags } from "@nestjs/swagger";
-import helmet from "helmet";
+import helmetModule from "helmet";
+import type { NextFunction, Request, RequestHandler, Response } from "express";
 import cookieParser from "cookie-parser";
 import {
   db,
@@ -190,7 +191,14 @@ export async function createApp(
     },
   );
   app.setGlobalPrefix("api/v1");
-  app.use(helmet());
+  const imported = helmetModule as unknown as {
+    default?: () => RequestHandler;
+  };
+  const secureHeaders =
+    typeof imported.default === "function"
+      ? imported.default
+      : (helmetModule as unknown as () => RequestHandler);
+  app.use(secureHeaders());
   app.use(cookieParser());
   app.use(securityMiddleware);
   app.useBodyParser("json", { limit: "1mb" });
@@ -217,4 +225,15 @@ export async function createApp(
   app.enableShutdownHooks();
   await app.init();
   return app;
+}
+let vercelApp: Promise<RequestHandler> | undefined;
+export default function vercelHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  vercelApp ??= createApp({
+    documents: { worker: process.env.VERCEL !== "1" },
+  }).then((app) => app.getHttpAdapter().getInstance() as RequestHandler);
+  return vercelApp.then((handler) => handler(req, res, next));
 }
