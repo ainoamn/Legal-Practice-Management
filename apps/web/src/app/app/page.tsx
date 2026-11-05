@@ -46,6 +46,7 @@ import { FinanceConsole } from "../../components/finance-console";
 import { InstrumentsConsole } from "../../components/instruments-console";
 import { CalendarConsole } from "../../components/calendar-console";
 import { BhdAppSwitcher } from "../../components/bhd/BhdAppSwitcher";
+import { LogoMark } from "../../components/brand/LogoMark";
 import { BhdMarketingChrome } from "../../components/bhd/BhdMarketingChrome";
 import { BhdSiteFooter } from "../../components/bhd/BhdSiteFooter";
 import {
@@ -405,7 +406,7 @@ export default function Home() {
   if (booting)
     return (
       <main className="boot" aria-busy="true">
-        <Scale size={40} />
+        <LogoMark size={44} />
         <p>{t.loading}</p>
       </main>
     );
@@ -416,11 +417,7 @@ export default function Home() {
         locale={locale}
         onLocaleChange={setLocale}
         brandHref="/"
-        brandMark={
-          <span className="brand-icon" style={{ width: 42, height: 42 }}>
-            <Scale size={20} />
-          </span>
-        }
+        brandMark={<LogoMark size={30} />}
         brand={
           <span>
             {t.brand}
@@ -658,9 +655,7 @@ export default function Home() {
     <div className="app-shell">
       <aside className="sidebar">
         <a className="brand" href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <span className="brand-icon">
-            <Scale />
-          </span>
+          <LogoMark size={26} />
           <span>
             {t.brand}
             <small>{t.tagline}</small>

@@ -134,16 +134,9 @@ const ICONS: Record<IconId, { label: string; soft: string; accent: string; glyph
   },
   legal: {
     label: "المكتب القانوني",
-    soft: "#e6f4f4",
-    accent: "#087e83",
-    glyph: (
-      <>
-        <path d="M24 12v20" />
-        <path d="M16 14h16" />
-        <path d="M24 17 15 30h7L24 17Zm0 0 9 13h-7L24 17Z" />
-        <path d="M17 33h14" />
-      </>
-    ),
+    soft: "#f4e8d8",
+    accent: "#9a7340",
+    glyph: <path d="M16 13v20h16" strokeWidth="3.4" />,
   },
 };
 

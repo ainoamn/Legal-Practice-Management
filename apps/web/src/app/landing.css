@@ -92,16 +92,8 @@ body:has(.lo-home) {
   flex: 1 1 auto;
 }
 
-.lo-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(145deg, #12a8ae, #066266);
-  box-shadow: 0 10px 22px #0b8f9433;
-  flex: 0 0 auto;
+.lo-home .bhd-chrome-brand {
+  align-items: center;
 }
 
 .lo-brand-copy {

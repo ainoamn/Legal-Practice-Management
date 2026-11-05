@@ -694,6 +694,45 @@ small {
   width: 43px;
   height: 43px;
 }
+.lo-logo {
+  display: inline-flex;
+  align-items: flex-start;
+  direction: ltr;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+.lo-logo svg {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+.lo-logo i {
+  display: grid;
+  place-content: center;
+  min-width: 1.55em;
+  min-height: 1.55em;
+  margin-block-start: -0.08em;
+  margin-inline-start: 0.22em;
+  padding: 0.06em 0.12em 0.08em;
+  color: #fff;
+  background: #b58d55;
+  border-radius: 0.42em 0.42em 0.42em 0.14em;
+  font-family: "IBM Plex Sans", Inter, sans-serif;
+  font-size: 0.42em;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  box-shadow: 0 3px 8px rgb(181 141 85 / 0.22);
+}
+:root[data-theme="dark"] .lo-logo svg path {
+  fill: #fff;
+}
+:root[data-theme="dark"] .lo-logo i {
+  color: #092d24;
+  background: #d7c2a2;
+  box-shadow: none;
+}
 .primary {
   border: 1px solid var(--teal);
   background: var(--teal);

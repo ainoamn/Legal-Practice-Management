@@ -40,14 +40,7 @@
   min-width: 0;
 }
 
-.laws-brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(145deg, #12a8ae, #066266);
+.laws-brand .lo-logo {
   flex: 0 0 auto;
 }
 
@@ -256,14 +249,8 @@
   border-bottom: 1px solid #d7e4e5;
 }
 
-.law-letterhead-mark {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(145deg, #12a8ae, #066266);
+.law-letterhead .lo-logo {
+  flex: 0 0 auto;
 }
 
 .law-letterhead-brand strong {

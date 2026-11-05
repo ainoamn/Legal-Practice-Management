@@ -20,6 +20,7 @@ import {
   X,
   Scale,
 } from "lucide-react";
+import { LogoMark } from "./brand/LogoMark";
 import { api, ApiError } from "../lib/api";
 import { adminAr, adminEn } from "../lib/admin-messages";
 import {
@@ -1018,9 +1019,7 @@ export function AdminConsole() {
     <div className="app-shell admin-shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-icon">
-            <ShieldCheck />
-          </span>
+          <LogoMark size={26} />
           <span>
             LEGAL OFFICE AI<small>{t.title}</small>
           </span>

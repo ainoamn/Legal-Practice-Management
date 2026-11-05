@@ -15,6 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { LogoMark } from "../brand/LogoMark";
 import {
   BhdMarketingChrome,
   SSO_START,
@@ -120,11 +121,7 @@ export function LandingPage() {
       <BhdMarketingChrome
         locale={locale}
         onLocaleChange={setLocale}
-        brandMark={
-          <span className="lo-mark" aria-hidden>
-            <Scale size={18} />
-          </span>
-        }
+        brandMark={<LogoMark size={30} />}
         brand={
           <span className="lo-brand-copy">
             <strong>LEGAL OFFICE AI</strong>

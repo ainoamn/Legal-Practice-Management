@@ -6,9 +6,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Printer,
-  Scale,
   ArrowRight,
 } from "lucide-react";
+import { LogoMark } from "../brand/LogoMark";
 import type { OmanLaw } from "../../lib/laws/types";
 import { paginateLaw } from "../../lib/laws/paginate";
 
@@ -74,9 +74,7 @@ export function LawReader({ law }: { law: OmanLaw }) {
         <article className="law-letter" aria-label={isAr ? law.titleAr : law.titleEn}>
           <div className="law-letter-flag" aria-hidden />
           <header className="law-letterhead">
-            <span className="law-letterhead-mark" aria-hidden>
-              <Scale size={24} />
-            </span>
+            <LogoMark size={40} />
             <div className="law-letterhead-brand">
               <strong>LEGAL OFFICE AI</strong>
               <span>

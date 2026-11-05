@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowUpLeft, BookOpen, Scale } from "lucide-react";
+import { ArrowUpLeft, BookOpen } from "lucide-react";
+import { LogoMark } from "../brand/LogoMark";
 import { OMAN_LAWS } from "../../lib/laws/oman-laws";
 
 export function LawsLibrary() {
@@ -30,9 +31,7 @@ export function LawsLibrary() {
     <div className="laws-shell" dir={isAr ? "rtl" : "ltr"} lang={locale}>
       <header className="laws-top">
         <Link href="/" className="laws-brand" prefetch>
-          <span className="laws-brand-mark" aria-hidden>
-            <Scale size={18} />
-          </span>
+          <LogoMark size={30} />
           <span>
             <strong>LEGAL OFFICE AI</strong>
             <small>{isAr ? "مكتبة القوانين العمانية" : "Omani laws library"}</small>
