@@ -1,0 +1,94 @@
+import type { OmanLaw } from "./types";
+import law0 from "./corpus/basic-statute.json";
+import law1 from "./corpus/penal-code.json";
+import law2 from "./corpus/criminal-procedure.json";
+import law3 from "./corpus/public-prosecution.json";
+import law4 from "./corpus/narcotics-law.json";
+import law5 from "./corpus/extradition-law.json";
+import law6 from "./corpus/judicial-authority.json";
+import law7 from "./corpus/admin-court.json";
+import law8 from "./corpus/investment-court.json";
+import law9 from "./corpus/advocacy-law.json";
+import law10 from "./corpus/notaries-law.json";
+import law11 from "./corpus/civil-transactions.json";
+import law12 from "./corpus/civil-commercial-procedure.json";
+import law13 from "./corpus/evidence-law.json";
+import law14 from "./corpus/arbitration-law.json";
+import law15 from "./corpus/tenancy-law.json";
+import law16 from "./corpus/waqf-law.json";
+import law17 from "./corpus/personal-status.json";
+import law18 from "./corpus/civil-status.json";
+import law19 from "./corpus/commercial-law.json";
+import law20 from "./corpus/companies-law.json";
+import law21 from "./corpus/commercial-agencies.json";
+import law22 from "./corpus/bankruptcy-law.json";
+import law23 from "./corpus/foreign-capital.json";
+import law24 from "./corpus/banking-law.json";
+import law25 from "./corpus/capital-market.json";
+import law26 from "./corpus/competition-law.json";
+import law27 from "./corpus/consumer-protection.json";
+import law28 from "./corpus/tenders-law.json";
+import law29 from "./corpus/free-zones.json";
+import law30 from "./corpus/maritime-law.json";
+import law31 from "./corpus/electronic-transactions.json";
+import law32 from "./corpus/copyright-law.json";
+import law33 from "./corpus/industrial-property.json";
+import law34 from "./corpus/aml-law.json";
+import law35 from "./corpus/labour-law.json";
+import law36 from "./corpus/social-protection.json";
+import law37 from "./corpus/civil-service.json";
+import law38 from "./corpus/foreign-residence.json";
+import law39 from "./corpus/income-tax.json";
+import law40 from "./corpus/personal-data.json";
+import law41 from "./corpus/traffic-law.json";
+import law42 from "./corpus/vehicle-insurance.json";
+
+const BY_SLUG: Record<string, OmanLaw> = {
+  "basic-statute": law0 as OmanLaw,
+  "penal-code": law1 as OmanLaw,
+  "criminal-procedure": law2 as OmanLaw,
+  "public-prosecution": law3 as OmanLaw,
+  "narcotics-law": law4 as OmanLaw,
+  "extradition-law": law5 as OmanLaw,
+  "judicial-authority": law6 as OmanLaw,
+  "admin-court": law7 as OmanLaw,
+  "investment-court": law8 as OmanLaw,
+  "advocacy-law": law9 as OmanLaw,
+  "notaries-law": law10 as OmanLaw,
+  "civil-transactions": law11 as OmanLaw,
+  "civil-commercial-procedure": law12 as OmanLaw,
+  "evidence-law": law13 as OmanLaw,
+  "arbitration-law": law14 as OmanLaw,
+  "tenancy-law": law15 as OmanLaw,
+  "waqf-law": law16 as OmanLaw,
+  "personal-status": law17 as OmanLaw,
+  "civil-status": law18 as OmanLaw,
+  "commercial-law": law19 as OmanLaw,
+  "companies-law": law20 as OmanLaw,
+  "commercial-agencies": law21 as OmanLaw,
+  "bankruptcy-law": law22 as OmanLaw,
+  "foreign-capital": law23 as OmanLaw,
+  "banking-law": law24 as OmanLaw,
+  "capital-market": law25 as OmanLaw,
+  "competition-law": law26 as OmanLaw,
+  "consumer-protection": law27 as OmanLaw,
+  "tenders-law": law28 as OmanLaw,
+  "free-zones": law29 as OmanLaw,
+  "maritime-law": law30 as OmanLaw,
+  "electronic-transactions": law31 as OmanLaw,
+  "copyright-law": law32 as OmanLaw,
+  "industrial-property": law33 as OmanLaw,
+  "aml-law": law34 as OmanLaw,
+  "labour-law": law35 as OmanLaw,
+  "social-protection": law36 as OmanLaw,
+  "civil-service": law37 as OmanLaw,
+  "foreign-residence": law38 as OmanLaw,
+  "income-tax": law39 as OmanLaw,
+  "personal-data": law40 as OmanLaw,
+  "traffic-law": law41 as OmanLaw,
+  "vehicle-insurance": law42 as OmanLaw,
+};
+
+export function getLawBySlug(slug: string): OmanLaw | null {
+  return BY_SLUG[slug] ?? null;
+}

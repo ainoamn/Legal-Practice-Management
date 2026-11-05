@@ -304,6 +304,14 @@
   font-size: 0.95rem;
 }
 
+.law-letter-title .law-source {
+  margin-top: 6px;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
 .law-letter-body {
   padding: 8px 32px 28px;
   flex: 1;
@@ -352,6 +360,26 @@
   line-height: 2;
   font-size: 1.02rem;
   text-align: justify;
+  white-space: pre-line;
+}
+
+.laws-search {
+  display: block;
+  width: min(440px, 100%);
+  margin-top: 16px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 0 14px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.laws-empty {
+  width: var(--content);
+  margin: 8px auto 0;
+  color: var(--muted);
 }
 
 .law-letter-footer {

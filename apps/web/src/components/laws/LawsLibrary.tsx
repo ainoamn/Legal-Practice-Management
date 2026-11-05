@@ -15,10 +15,15 @@ export function LawsLibrary() {
   }, [isAr]);
 
   const [category, setCategory] = useState("all");
+  const [query, setQuery] = useState("");
 
   const filtered = OMAN_LAWS.filter((law) => {
-    if (category === "all") return true;
-    return (isAr ? law.categoryAr : law.categoryEn) === category;
+    if (category !== "all" && (isAr ? law.categoryAr : law.categoryEn) !== category) return false;
+    const needle = query.trim().toLowerCase();
+    if (!needle) return true;
+    return `${law.titleAr} ${law.titleEn} ${law.decree} ${law.summaryAr} ${law.summaryEn} ${law.categoryAr}`
+      .toLowerCase()
+      .includes(needle);
   });
 
   return (
@@ -56,9 +61,16 @@ export function LawsLibrary() {
         </p>
         <div className="laws-note" role="note">
           {isAr
-            ? "نسخة مرجعية مكتبية داخل LEGAL OFFICE AI مع ذكر المرسوم. للاعتماد القضائي الرسمي راجع الجريدة الرسمية لسلطنة عُمان وأحدث التعديلات."
-            : "In-platform reference edition citing the Royal Decree. For official judicial use, consult Oman’s Official Gazette and latest amendments."}
+            ? "النصوص الكاملة منقولة من النسخ المنشورة على qanoon.om عن الجريدة الرسمية، مع ذكر مرسوم الإصدار وآخر تعديل ظاهر في المصدر. للاعتماد القضائي راجع الجريدة الرسمية."
+            : "Full texts are taken from the consolidated pages on qanoon.om, which republish the Official Gazette, with the issuing decree and the latest amendment shown on that source. For judicial use, consult the Official Gazette."}
         </div>
+        <input
+          className="laws-search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={isAr ? "ابحث عن قانون أو مرسوم" : "Search a law or decree"}
+          aria-label={isAr ? "بحث في المكتبة" : "Search the library"}
+        />
         <div className="laws-top-actions" style={{ marginTop: 16 }}>
           {categories.map((item) => (
             <button
@@ -78,6 +90,9 @@ export function LawsLibrary() {
         </div>
       </section>
 
+      {filtered.length === 0 ? (
+        <p className="laws-empty">{isAr ? "لا توجد نتيجة لهذا البحث." : "No law matches this search."}</p>
+      ) : null}
       <div className="laws-grid">
         {filtered.map((law) => (
           <Link key={law.slug} href={`/laws/${law.slug}`} className="laws-card" prefetch>
@@ -89,6 +104,8 @@ export function LawsLibrary() {
             <span className="laws-card-meta">
               <BookOpen size={14} style={{ display: "inline", marginInlineEnd: 6 }} />
               {law.decree}
+              {" · "}
+              {isAr ? `${law.articleCount} مادة` : `${law.articleCount} articles`}
             </span>
             <span className="laws-btn laws-btn-primary" style={{ alignSelf: "flex-start" }}>
               {isAr ? "افتح للقراءة" : "Open to read"}

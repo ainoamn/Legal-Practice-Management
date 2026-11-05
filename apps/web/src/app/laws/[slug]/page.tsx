@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LawReader } from "../../../components/laws/LawReader";
-import { OMAN_LAWS, getLawBySlug } from "../../../lib/laws/oman-laws";
+import { getLawBySlug } from "../../../lib/laws/load-law";
+import { OMAN_LAWS } from "../../../lib/laws/oman-laws";
 import "../laws.css";
 
 type Props = { params: Promise<{ slug: string }> };

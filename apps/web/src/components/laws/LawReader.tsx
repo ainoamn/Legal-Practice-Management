@@ -99,17 +99,40 @@ export function LawReader({ law }: { law: OmanLaw }) {
           <div className="law-letter-title">
             <h1>{isAr ? law.titleAr : law.titleEn}</h1>
             <p>{law.decree}</p>
+            {law.amendedThrough ? (
+              <p className="law-source">
+                {isAr ? `معدل لغاية ${law.amendedThrough}` : `Amended through ${law.amendedThrough}`}
+              </p>
+            ) : null}
+            {law.sourceNoteAr ? (
+              <p className="law-source">{isAr ? law.sourceNoteAr : law.sourceNoteEn}</p>
+            ) : null}
+            <p className="law-source">
+              {isAr
+                ? "النص كما نُشر في المصدر. للاعتماد القضائي راجع الجريدة الرسمية."
+                : "Text as published at the source. For judicial use, consult the Official Gazette."}
+            </p>
           </div>
 
           <div className="law-letter-body">
             {current.chapterTitle ? (
               <p className="law-chapter-label">{current.chapterTitle}</p>
             ) : null}
-            {current.articles.map((article) => (
-              <section key={`${article.number}-${article.title ?? ""}`} className="law-article">
+            {current.articles.map((article, articleIndex) => (
+              <section key={`${current.index}-${articleIndex}`} className="law-article">
                 <div className="law-article-head">
                   <span className="law-article-num">
-                    {isAr ? `المادة (${article.number})` : `Article (${article.number})`}
+                    {article.number === "ديباجة"
+                      ? isAr
+                        ? "ديباجة"
+                        : "Preamble"
+                      : article.number === "حاشية"
+                        ? isAr
+                          ? "حاشية المصدر"
+                          : "Source notes"
+                        : isAr
+                          ? `المادة (${article.number})`
+                          : `Article (${article.number})`}
                   </span>
                   {article.title ? (
                     <h2 className="law-article-title">{article.title}</h2>
@@ -121,7 +144,7 @@ export function LawReader({ law }: { law: OmanLaw }) {
           </div>
 
           <footer className="law-letter-footer">
-            <span>LEGAL OFFICE AI · Bin Hamood Development</span>
+            <span>{law.sourceUrl}</span>
             <span>
               {isAr ? "صفحة" : "Page"} {current.index} / {total}
             </span>

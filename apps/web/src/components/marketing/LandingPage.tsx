@@ -54,8 +54,8 @@ const FEATURES = [
   },
   {
     icon: BookOpen,
-    ar: { t: "مكتبة القوانين", d: "قوانين عمانية للقراءة صفحة بصفحة مع ترويسة رسمية للطباعة." },
-    en: { t: "Laws library", d: "Omani laws to read page by page with an official printable letterhead." },
+    ar: { t: "مكتبة القوانين", d: "النصوص الكاملة للقوانين العمانية، صفحة بصفحة، مع ترويسة رسمية للطباعة." },
+    en: { t: "Laws library", d: "Full texts of Omani laws, page by page, with an official printable letterhead." },
   },
 ] as const;
 

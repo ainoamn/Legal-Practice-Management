@@ -19,7 +19,16 @@ export type OmanLaw = {
   categoryEn: string;
   summaryAr: string;
   summaryEn: string;
+  sourceUrl: string;
+  sourceNoteAr?: string;
+  sourceNoteEn?: string;
+  /** أحدث تعديل تشير إليه صفحة النص المجمّع. */
+  amendedThrough?: string;
   chapters: LawChapter[];
+};
+
+export type LawCatalogItem = Omit<OmanLaw, "chapters"> & {
+  articleCount: number;
 };
 
 export type LawPage = {
