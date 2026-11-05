@@ -1,4 +1,16 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { citedAnswer } from "../apps/api/src/ai/citations.js";
+import { TRIAL_MS } from "../apps/api/src/billing/trial.js";
+describe("office trial and cited answers", () => {
+  it("keeps a trial inside the database window and requires a real source id", () => {
+    expect(TRIAL_MS).toBeLessThanOrEqual(14 * 24 * 60 * 60 * 1000);
+    const source = { id: "11111111-1111-4111-8111-111111111111", title: "عقد", excerpt: "المدة سنة" };
+    expect(citedAnswer("المدة سنة حسب 11111111-1111-4111-8111-111111111111", [source])?.citations).toEqual([
+      source.id,
+    ]);
+    expect(citedAnswer("المادة 12 من قانون غير مرفق", [source])).toBeNull();
+  });
+});
 import {
   officeDay,
   officeDayStart,

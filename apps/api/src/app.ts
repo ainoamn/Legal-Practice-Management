@@ -36,6 +36,10 @@ import { PortalController } from "./portal/portal.controller.js";
 import { PortalService } from "./portal/portal.service.js";
 import { InstrumentsController } from "./instruments/instruments.controller.js";
 import { InstrumentsService } from "./instruments/instruments.service.js";
+import { BillingController } from "./billing/billing.controller.js";
+import { BillingService } from "./billing/billing.service.js";
+import { AiController } from "./ai/ai.controller.js";
+import { AiService } from "./ai/ai.service.js";
 import { DocumentsController } from "./documents/documents.controller.js";
 import { DocumentsService } from "./documents/documents.service.js";
 import { DocumentStorage, S3DocumentStorage } from "./documents/storage.js";
@@ -118,6 +122,8 @@ class WorkspaceModule {
         FinanceController,
         PortalController,
         InstrumentsController,
+        BillingController,
+        AiController,
       ],
       providers: [
         WorkspaceService,
@@ -126,6 +132,8 @@ class WorkspaceModule {
         FinanceService,
         PortalService,
         InstrumentsService,
+        BillingService,
+        AiService,
         DocumentJobs,
         SessionGuard,
         {

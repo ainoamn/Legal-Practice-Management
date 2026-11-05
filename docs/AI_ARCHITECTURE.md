@@ -1,4 +1,6 @@
-# AI architecture — planned, disabled
+# AI architecture
+
+Provider calls go through `POST /api/v1/ai/ask` and only return text that cites a ready extracted document version in the same matter. Missing `AI_API_KEY` returns `AI_DISABLED` and the interface shows that the service is off. No synthetic legal answer is stored or displayed. Vector search, external legal-research connectors, and court-outcome prediction remain absent.
 
 Provider interface: generate, embed, usage; tenant opt-in and model/task configuration with encrypted secret references. No provider calls or AI buttons until integration is implemented and tested. Keys never enter public Next environment. Missing keys return a typed disabled capability, never synthetic legal output.
 

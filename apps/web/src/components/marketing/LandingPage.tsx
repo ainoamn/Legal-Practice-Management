@@ -15,6 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { displayMoney } from "@legal/contracts/platform";
 import { LogoMark } from "../brand/LogoMark";
 import {
   BhdMarketingChrome,
@@ -99,6 +100,18 @@ export function LandingPage() {
   const [locale, setLocale] = useState<"ar" | "en">("ar");
   const [ready, setReady] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [plans, setPlans] = useState<
+    {
+      id: string;
+      name: string;
+      priceMinor: number;
+      currency: string;
+      currencyDecimals: number;
+      interval: string;
+      maxUsers: number;
+      maxMatters: number;
+    }[]
+  >([]);
   const isAr = locale === "ar";
 
   useEffect(() => {
@@ -111,6 +124,10 @@ export function LandingPage() {
       setAuthError(ERRORS[locale][err] ?? err);
       window.history.replaceState({}, "", window.location.pathname);
     }
+    void fetch("/api/v1/public/plans")
+      .then((response) => (response.ok ? response.json() : []))
+      .then((rows: typeof plans) => setPlans(Array.isArray(rows) ? rows : []))
+      .catch(() => setPlans([]));
     return () => window.cancelAnimationFrame(id);
   }, [locale]);
 
@@ -225,6 +242,52 @@ export function LandingPage() {
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="lo-section" id="plans">
+        <div className="lo-section-head">
+          <p className="lo-label">{isAr ? "الباقات" : "Plans"}</p>
+          <h2>
+            {isAr ? "الأسعار من لوحة المنصة" : "Prices come from the platform"}
+          </h2>
+          <p>
+            {isAr
+              ? "التجربة 14 يوماً بلا بطاقة. الدفع الإلكتروني غير موصول، ولا تُعرض أسعار ثابتة في الصفحة."
+              : "The trial is 14 days and does not take a card. Electronic payment is not connected, and this page does not invent prices."}
+          </p>
+        </div>
+        <div className="lo-features">
+          {plans.map((plan) => (
+            <article key={plan.id} className="lo-feature">
+              <h3>{plan.name}</h3>
+              <p>
+                {displayMoney(plan.priceMinor, plan.currencyDecimals)} {plan.currency}
+                {" · "}
+                {plan.interval === "YEARLY"
+                  ? isAr
+                    ? "سنوي"
+                    : "Yearly"
+                  : isAr
+                    ? "شهري"
+                    : "Monthly"}
+              </p>
+              <p>
+                {plan.maxUsers} {isAr ? "مستخدمين" : "users"} · {plan.maxMatters}{" "}
+                {isAr ? "قضايا" : "matters"}
+              </p>
+            </article>
+          ))}
+          {!plans.length && (
+            <article className="lo-feature">
+              <h3>{isAr ? "لا توجد باقة منشورة" : "No published plan"}</h3>
+              <p>
+                {isAr
+                  ? "تظهر الباقة هنا بعد إنشائها من لوحة إدارة المنصة."
+                  : "A plan appears here after it is created in the platform console."}
+              </p>
+            </article>
+          )}
         </div>
       </section>
 

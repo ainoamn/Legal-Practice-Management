@@ -29,6 +29,7 @@ import {
 } from "../lib/api";
 import { parseMinor, displayMoney } from "@legal/contracts/platform";
 import { DocumentsPanel } from "./documents-panel";
+import { MatterAssistant } from "./matter-assistant";
 import { StaffPortalPanel } from "./portal-panel";
 import { recordLabel } from "../lib/record-labels";
 type Client = {
@@ -1131,7 +1132,10 @@ export function PracticeConsole({
               ["tasks", "المهام", "Tasks"],
               ["notes", "الملاحظات", "Notes"],
               ...(can("documents:read")
-                ? [["documents", "المستندات", "Documents"]]
+                ? [
+                    ["documents", "المستندات", "Documents"],
+                    ["assistant", "المساعد", "Assistant"],
+                  ]
                 : []),
               ["timeline", "الخط الزمني", "Timeline"],
             ].map(([id, a, e]) => (
@@ -1193,6 +1197,9 @@ export function PracticeConsole({
                 )}
               </article>
             </div>
+          )}
+          {detailTab === "assistant" && can("documents:read") && (
+            <MatterAssistant locale={locale} matterId={detail.id} />
           )}
           {detailTab === "documents" && (
             <DocumentsPanel

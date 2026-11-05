@@ -313,6 +313,26 @@ export class PublishedController {
       }
     );
   }
+  @Get("plans") plans() {
+    return db.plan.findMany({
+      where: { active: true },
+      select: {
+        id: true,
+        name: true,
+        priceMinor: true,
+        currency: true,
+        currencyDecimals: true,
+        interval: true,
+        maxUsers: true,
+        maxMatters: true,
+        maxBranches: true,
+        maxStorageMiB: true,
+        maxAiOperations: true,
+      },
+      orderBy: { priceMinor: "asc" },
+      take: 12,
+    });
+  }
   @Get("pages") pages() {
     return db.sitePage.findMany({
       where: { status: "PUBLISHED" },

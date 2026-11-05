@@ -47,6 +47,7 @@ import { InstrumentsConsole } from "../../components/instruments-console";
 import { CalendarConsole } from "../../components/calendar-console";
 import { BhdAppSwitcher } from "../../components/bhd/BhdAppSwitcher";
 import { LogoMark } from "../../components/brand/LogoMark";
+import { OfficePlanPanel } from "../../components/office-plan-panel";
 import { BhdMarketingChrome } from "../../components/bhd/BhdMarketingChrome";
 import { BhdSiteFooter } from "../../components/bhd/BhdSiteFooter";
 import {
@@ -1044,6 +1045,10 @@ export default function Home() {
                       </button>
                     )}
                   </form>
+                  <OfficePlanPanel
+                    locale={locale}
+                    canManage={can("workspace:manage")}
+                  />
                 </section>
               )}
               {tab === "sessions" && (
