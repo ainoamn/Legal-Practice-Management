@@ -229,12 +229,14 @@ export async function verifyBhdIdToken(
     const secrets = [
       process.env.BHD_IDENTITY_TOKEN_SECRET,
       process.env.IDENTITY_TOKEN_SECRET,
-      process.env.BHD_OAUTH_CLIENT_SECRET,
     ]
       .map((value) =>
         (value ?? "")
-          .replace(/\\r\\n/g, "")
-          .replace(/[\r\n]+/g, "")
+          .replace(/^\uFEFF/, "")
+          .replace(/\\r\\n$/i, "")
+          .replace(/\\n$/i, "")
+          .replace(/\r\n$/g, "")
+          .replace(/\n$/g, "")
           .trim(),
       )
       .filter(Boolean);

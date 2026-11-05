@@ -245,7 +245,9 @@ export class BhdController {
         },
         bearer,
       );
-    } catch {
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "verify_failed";
+      console.error("bhd_rebind_verify", reason);
       throw new HttpException("UNAUTHENTICATED", 401);
     }
 
