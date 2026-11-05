@@ -68,7 +68,16 @@ export function securityMiddleware(
   res.setHeader("X-Request-Id", (req as AuthRequest).requestId);
   res.setHeader("Cache-Control", "no-store");
   if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
-    if (req.headers.origin !== process.env.WEB_ORIGIN) {
+    const clean = (value: string | undefined) =>
+      (value ?? "")
+        .replace(/\\r\\n/g, "")
+        .replace(/[\r\n]+/g, "")
+        .trim()
+        .replace(/\/$/, "");
+    const originHeader = Array.isArray(req.headers.origin)
+      ? req.headers.origin[0]
+      : req.headers.origin;
+    if (clean(originHeader) !== clean(process.env.WEB_ORIGIN)) {
       res.status(403).json({
         error: {
           code: "ORIGIN_REJECTED",

@@ -216,7 +216,7 @@ export async function verifyBhdIdToken(
   accessToken?: string,
 ) {
   const header = jose.decodeProtectedHeader(idToken);
-  let payload: jose.JWTPayload;
+  let payload: jose.JWTPayload | undefined;
   if (header.alg === "RS256") {
     payload = (
       await jose.jwtVerify(idToken, jwksFor(expected.issuer), {
@@ -226,19 +226,46 @@ export async function verifyBhdIdToken(
       })
     ).payload;
   } else if (header.alg === "HS256") {
-    const secret = process.env.BHD_IDENTITY_TOKEN_SECRET?.trim();
-    if (secret) {
-      payload = (
-        await jose.jwtVerify(idToken, new TextEncoder().encode(secret), {
-          issuer: expected.issuer,
-          audience: expected.audience,
-          algorithms: ["HS256"],
-        })
-      ).payload;
-    } else if (accessToken) {
-      const infoResp = await fetch(`${expected.issuer}/oauth/userinfo`, {
+    const secrets = [
+      process.env.BHD_IDENTITY_TOKEN_SECRET,
+      process.env.IDENTITY_TOKEN_SECRET,
+      process.env.BHD_OAUTH_CLIENT_SECRET,
+    ]
+      .map((value) =>
+        (value ?? "")
+          .replace(/\\r\\n/g, "")
+          .replace(/[\r\n]+/g, "")
+          .trim(),
+      )
+      .filter(Boolean);
+    let verified = false;
+    for (const secret of secrets) {
+      try {
+        payload = (
+          await jose.jwtVerify(idToken, new TextEncoder().encode(secret), {
+            issuer: expected.issuer,
+            audience: expected.audience,
+            algorithms: ["HS256"],
+          })
+        ).payload;
+        verified = true;
+        break;
+      } catch {
+        verified = false;
+      }
+    }
+    if (!verified) {
+      if (!accessToken) throw new Error("missing_hs256_secret");
+      let infoResp = await fetch(`${expected.issuer}/oauth/userinfo`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+      if (!infoResp.ok) {
+        infoResp = await fetch(`${expected.issuer}/oauth/userinfo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ access_token: accessToken }),
+        });
+      }
       if (!infoResp.ok) throw new Error("userinfo_failed");
       const info = (await infoResp.json()) as {
         sub?: string;
@@ -257,8 +284,9 @@ export async function verifyBhdIdToken(
         name: info.name ?? decoded.name,
         picture: info.picture ?? decoded.picture,
       };
-    } else throw new Error("missing_hs256_secret");
+    }
   } else throw new Error("unsupported_alg");
+  if (!payload) throw new Error("invalid_token");
   return assertClaims(payload, expected);
 }
 

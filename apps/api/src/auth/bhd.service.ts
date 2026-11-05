@@ -67,12 +67,6 @@ export class BhdService {
 
   /** First SSO visit: open a personal office so the user can enter the workspace. */
   private async ensurePersonalOffice(userId: string) {
-    const existing = await db.membership.findFirst({
-      where: { userId, active: true },
-      select: { id: true },
-    });
-    if (existing) return;
-
     const user = await db.user.findUniqueOrThrow({ where: { id: userId } });
     const country =
       (await db.country.findFirst({ where: { code: "OM", enabled: true } })) ??
@@ -94,6 +88,7 @@ export class BhdService {
     }
 
     const tenantId = randomUUID();
+    let membershipId = "";
     await inTenant(tenantId, async (tx) => {
       await tx.tenant.create({
         data: {
@@ -114,7 +109,7 @@ export class BhdService {
         const created = await tx.role.create({ data: { tenantId, ...role } });
         if (role.key === "OWNER") ownerRoleId = created.id;
       }
-      await tx.membership.create({
+      const member = await tx.membership.create({
         data: {
           tenantId,
           userId,
@@ -122,6 +117,7 @@ export class BhdService {
           branchId: branch.id,
         },
       });
+      membershipId = member.id;
       await tx.auditLog.create({
         data: {
           tenantId,
@@ -131,22 +127,29 @@ export class BhdService {
         },
       });
     });
+    return { tenantId, membershipId };
   }
 
   async issueForUser(userId: string, userAgent: string, slug?: string) {
-    await this.ensurePersonalOffice(userId);
-    const memberships = await db.membership.findMany({
-      where: { userId, active: true },
-      orderBy: { createdAt: "asc" },
-      include: { tenant: true },
+    const prior = await db.session.findFirst({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: { tenantId: true, membershipId: true },
     });
-    if (!memberships.length) throw new UnauthorizedException("OFFICE_PROVISION_FAILED");
-    const preferred = slug
-      ? memberships.find((item) => item.tenant.slug === slug)
-      : undefined;
-    const member = preferred ?? memberships[0]!;
+    const office = prior ?? (await this.ensurePersonalOffice(userId));
+
     const maxAgeSec = await identitySessionMaxAgeSec();
-    return inTenant(member.tenantId, async (tx) => {
+    return inTenant(office.tenantId, async (tx) => {
+      const member = await tx.membership.findFirst({
+        where: {
+          id: office.membershipId,
+          userId,
+          active: true,
+          ...(slug ? { tenant: { slug } } : {}),
+        },
+        include: { tenant: true },
+      });
+      if (!member) throw new UnauthorizedException("OFFICE_PROVISION_FAILED");
       const session = await this.auth.issueSession(
         tx,
         {
@@ -160,10 +163,7 @@ export class BhdService {
       return {
         ...session,
         tenantSlug: member.tenant.slug,
-        offices: memberships.map((item) => ({
-          slug: item.tenant.slug,
-          name: item.tenant.name,
-        })),
+        offices: [{ slug: member.tenant.slug, name: member.tenant.name }],
       };
     });
   }

@@ -63,8 +63,12 @@ export async function GET(request: NextRequest) {
       }),
     });
     if (!tokenResp.ok) return fail(request, "bhd_token", secure);
-    const tokens = (await tokenResp.json()) as { access_token?: string };
-    if (!tokens.access_token) return fail(request, "bhd_token", secure);
+    const tokens = (await tokenResp.json()) as {
+      access_token?: string;
+      id_token?: string;
+    };
+    if (!tokens.access_token || !tokens.id_token)
+      return fail(request, "bhd_token", secure);
 
     const api = internalApiUrl();
     const origin = requestOrigin(request);
@@ -75,7 +79,10 @@ export async function GET(request: NextRequest) {
         Origin: origin,
         "Content-Type": "application/json",
       },
-      body: "{}",
+      body: JSON.stringify({
+        idToken: tokens.id_token,
+        nonce: saved.nonce,
+      }),
     });
     if (!rebind.ok) {
       if (rebind.status === 400) return fail(request, "bhd_no_office", secure);

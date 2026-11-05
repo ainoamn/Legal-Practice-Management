@@ -229,43 +229,27 @@ export class BhdController {
       : "";
     if (!bearer) throw new HttpException("UNAUTHENTICATED", 401);
 
-    const issuer = bhdIdentityIssuer();
-    let sub = "";
-    let email = "";
-    let name: string | null = null;
+    const body = (req.body ?? {}) as { idToken?: string; nonce?: string };
+    const idToken = typeof body.idToken === "string" ? body.idToken : "";
+    const nonce = typeof body.nonce === "string" ? body.nonce : "";
+    if (!idToken || !nonce) throw new HttpException("UNAUTHENTICATED", 401);
 
-    const userinfoResp = await fetch(`${issuer}/oauth/userinfo`, {
-      headers: { Authorization: `Bearer ${bearer}` },
-    });
-    if (userinfoResp.ok) {
-      const info = (await userinfoResp.json()) as {
-        sub?: string;
-        email?: string;
-        name?: string;
-      };
-      sub = info.sub?.trim() || "";
-      email = info.email?.trim().toLowerCase() || "";
-      name = info.name?.trim() || null;
-    } else {
-      const meResp = await fetch(`${issuer}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${bearer}` },
-      });
-      if (!meResp.ok) throw new HttpException("UNAUTHENTICATED", 401);
-      const body = (await meResp.json()) as {
-        user?: { id?: string; email?: string; name?: string };
-      };
-      sub = body.user?.id?.trim() || "";
-      email = body.user?.email?.trim().toLowerCase() || "";
-      name = body.user?.name?.trim() || null;
+    let claims;
+    try {
+      claims = await verifyBhdIdToken(
+        idToken,
+        {
+          issuer: bhdIdentityIssuer(),
+          audience: bhdOauthClientId(),
+          nonce,
+        },
+        bearer,
+      );
+    } catch {
+      throw new HttpException("UNAUTHENTICATED", 401);
     }
-    if (!sub || !email) throw new HttpException("UNAUTHENTICATED", 401);
 
-    const userId = await this.bhd.linkOrCreate({
-      sub,
-      email,
-      name,
-      picture: null,
-    });
+    const userId = await this.bhd.linkOrCreate(claims);
     const session = await this.bhd.issueForUser(
       userId,
       req.headers["user-agent"] ?? "",
