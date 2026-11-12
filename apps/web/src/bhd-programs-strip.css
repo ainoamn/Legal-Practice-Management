@@ -1,0 +1,81 @@
+.bhd-programs-strip--header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  max-width: min(42vw, 28rem);
+  overflow: hidden;
+}
+
+.bhd-programs-strip-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bhd-programs-strip-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgb(9 45 36 / 12%);
+}
+
+.bhd-programs-strip-icon .bhd-app-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.bhd-programs-strip--footer {
+  border-top: 1px solid #d7e2dc;
+  background: linear-gradient(180deg, #eef6f2 0%, #f8faf8 100%);
+  padding: 1.25rem 1rem;
+}
+
+.bhd-programs-strip-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.bhd-programs-strip-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #092d24;
+}
+
+.bhd-programs-strip-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #c5ddd3;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  text-decoration: none;
+  color: #092d24;
+  font-size: 0.8125rem;
+  transition: border-color 0.15s ease;
+}
+
+.bhd-programs-strip-chip:hover {
+  border-color: #075c45;
+}
+
+.bhd-programs-strip-chip .bhd-app-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+}
+
+@media (max-width: 720px) {
+  .bhd-programs-strip--header {
+    display: none;
+  }
+}

@@ -1,4 +1,4 @@
-import { DEFAULT_IDENTITY_ISSUER } from "../identity/issuer";
+import { DEFAULT_IDENTITY_ISSUER } from "@/lib/bhd/identity-public";
 import { BHD_APPS_FALLBACK, type BhdApp, type BhdAppMode } from "./apps";
 
 export const IDENTITY_CATALOG_URL = `${DEFAULT_IDENTITY_ISSUER}/api/bhd/catalog`;

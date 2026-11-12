@@ -191,6 +191,7 @@ export class BhdController {
     @Req() req: Request,
     @Res() res: Response,
     @Query("all") all?: string,
+    @Query("continue") cont?: string,
   ) {
     const token = req.cookies?.[COOKIE];
     if (typeof token === "string" && token) {
@@ -205,8 +206,16 @@ export class BhdController {
       }
     }
     res.clearCookie(COOKIE, { path: "/" });
-    if (!isBhdIdentityReady()) return res.redirect("/");
     const origin = requestOrigin(req);
+    if (typeof cont === "string" && cont) {
+      if (cont.startsWith("http://") || cont.startsWith("https://")) {
+        return res.redirect(303, cont);
+      }
+      if (isSafeReturnTo(cont)) {
+        return res.redirect(303, new URL(cont, origin).toString());
+      }
+    }
+    if (!isBhdIdentityReady()) return res.redirect("/");
     return res.redirect(
       bhdEndSessionUrl({
         issuer: bhdIdentityIssuer(),
@@ -220,38 +229,119 @@ export class BhdController {
   @Post("rebind")
   async rebind(
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
     @Headers("authorization") authorization?: string,
   ) {
     if (!isBhdIdentityReady()) throw new HttpException("BHD_NOT_READY", 503);
-    const bearer = authorization?.startsWith("Bearer ")
-      ? authorization.slice(7)
-      : "";
-    if (!bearer) throw new HttpException("UNAUTHENTICATED", 401);
 
-    const body = (req.body ?? {}) as { idToken?: string; nonce?: string };
+    const body = (req.body ?? {}) as {
+      idToken?: string;
+      nonce?: string;
+      token?: string;
+      returnTo?: string;
+    };
+    const accept = req.headers.accept || "";
+    const wantsJson = accept.includes("application/json");
+    const returnTo = isSafeReturnTo(body.returnTo) ? body.returnTo! : "/app";
+    const origin = requestOrigin(req);
+
+    const headerBearer = authorization?.startsWith("Bearer ")
+      ? authorization.slice(7).trim()
+      : "";
+    const bodyToken =
+      typeof body.token === "string" ? body.token.trim() : "";
     const idToken = typeof body.idToken === "string" ? body.idToken : "";
     const nonce = typeof body.nonce === "string" ? body.nonce : "";
-    if (!idToken || !nonce) throw new HttpException("UNAUTHENTICATED", 401);
 
-    let claims;
+    let claims: Awaited<ReturnType<typeof verifyBhdIdToken>>;
+
+    if (idToken && nonce) {
+      if (!headerBearer) throw new HttpException("UNAUTHENTICATED", 401);
+      try {
+        claims = await verifyBhdIdToken(
+          idToken,
+          {
+            issuer: bhdIdentityIssuer(),
+            audience: bhdOauthClientId(),
+            nonce,
+          },
+          headerBearer,
+        );
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "verify_failed";
+        console.error("bhd_rebind_verify", reason);
+        throw new HttpException("UNAUTHENTICATED", 401);
+      }
+    } else {
+      const windowToken = bodyToken || headerBearer;
+      if (!windowToken || windowToken.length < 20) {
+        if (wantsJson) {
+          return res.status(401).json({ ok: false, error: "token" });
+        }
+        return res.redirect(
+          303,
+          new URL(
+            `/api/auth/bhd/start?returnTo=${encodeURIComponent(returnTo)}`,
+            origin,
+          ).toString(),
+        );
+      }
+      try {
+        claims = await profileFromWindowToken(windowToken);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "me_failed";
+        console.error("bhd_rebind_window", reason);
+        if (wantsJson) {
+          res.clearCookie(COOKIE, { path: "/" });
+          return res.status(401).json({ ok: false, error: "rebind" });
+        }
+        return res.redirect(
+          303,
+          new URL(
+            `/api/auth/bhd/logout?continue=${encodeURIComponent(`/api/auth/bhd/start?returnTo=${encodeURIComponent(returnTo)}`)}`,
+            origin,
+          ).toString(),
+        );
+      }
+    }
+
+    const existingCookie =
+      typeof req.cookies?.[COOKIE] === "string" ? req.cookies[COOKIE] : "";
+    if (existingCookie) {
+      const existing = await db.session.findUnique({
+        where: { tokenHash: hashToken(existingCookie) },
+        include: { user: { select: { bhdSub: true, email: true, fullName: true } } },
+      });
+      if (
+        existing &&
+        !existing.revokedAt &&
+        existing.expiresAt > new Date() &&
+        existing.user.bhdSub === claims.sub
+      ) {
+        if (wantsJson) {
+          return res.status(200).json({
+            ok: true,
+            unchanged: true,
+            user: {
+              id: claims.sub,
+              email: existing.user.email,
+              name: existing.user.fullName,
+            },
+          });
+        }
+        const target = new URL(returnTo, origin);
+        target.searchParams.set("au", claims.sub);
+        return res.redirect(303, target.toString());
+      }
+    }
+
+    let userId: string;
     try {
-      claims = await verifyBhdIdToken(
-        idToken,
-        {
-          issuer: bhdIdentityIssuer(),
-          audience: bhdOauthClientId(),
-          nonce,
-        },
-        bearer,
-      );
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "verify_failed";
-      console.error("bhd_rebind_verify", reason);
+      userId = await this.bhd.linkOrCreate(claims);
+    } catch {
       throw new HttpException("UNAUTHENTICATED", 401);
     }
 
-    const userId = await this.bhd.linkOrCreate(claims);
     const session = await this.bhd.issueForUser(
       userId,
       req.headers["user-agent"] ?? "",
@@ -265,13 +355,49 @@ export class BhdController {
       expires: session.expiresAt,
       maxAge: maxAgeSec,
     });
-    return {
-      ok: true,
-      tenantSlug: session.tenantSlug,
-      maxAgeSec,
-      // Used by Next callback on a different host to mint the first-party session cookie.
-      sessionToken: session.token,
-      expiresAt: session.expiresAt.toISOString(),
+
+    const userPayload = {
+      id: claims.sub,
+      email: claims.email,
+      name: claims.name || claims.email,
     };
+
+    if (wantsJson || (idToken && nonce)) {
+      return res.status(200).json({
+        ok: true,
+        user: userPayload,
+        tenantSlug: session.tenantSlug,
+        maxAgeSec,
+        sessionToken: session.token,
+        expiresAt: session.expiresAt.toISOString(),
+      });
+    }
+
+    const target = new URL(returnTo, origin);
+    target.searchParams.set("au", claims.sub);
+    target.searchParams.set("_bhd", String(Date.now()));
+    return res.redirect(303, target.toString());
   }
+}
+
+async function profileFromWindowToken(token: string) {
+  const response = await fetch(`${bhdIdentityIssuer()}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) throw new Error(`me_${response.status}`);
+  const body = (await response.json()) as {
+    user?: { id?: string; email?: string; name?: string; picture?: string } | null;
+  };
+  const user = body.user;
+  const email = typeof user?.email === "string" ? user.email.trim().toLowerCase() : "";
+  const sub = typeof user?.id === "string" ? user.id.trim() : "";
+  if (!sub || !email) throw new Error("claims");
+  return {
+    sub,
+    email,
+    name: typeof user?.name === "string" && user.name.trim() ? user.name.trim() : email,
+    picture: typeof user?.picture === "string" ? user.picture : null,
+  };
 }

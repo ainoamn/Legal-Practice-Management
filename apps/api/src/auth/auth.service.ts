@@ -164,7 +164,9 @@ export class AuthService {
         include: {
           role: true,
           branch: true,
-          user: { select: { id: true, email: true, fullName: true } },
+          user: {
+            select: { id: true, email: true, fullName: true, bhdSub: true },
+          },
           tenant: { include: { country: true } },
         },
       });

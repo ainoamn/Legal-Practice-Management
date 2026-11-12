@@ -1,4 +1,4 @@
-/** Types for https://id.bhd-om.com/bhd-identity.js */
+/** Types for https://id.bhd-om.com/bhd-identity.js — do not reimplement session/window logic locally. */
 
 export type BhdIdentityUser = {
   id?: string;

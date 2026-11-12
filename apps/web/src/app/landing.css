@@ -89,7 +89,12 @@ body:has(.lo-home) {
   text-decoration: none;
   color: inherit;
   min-width: 0;
+  flex: 0 1 auto;
+}
+
+.lo-home .bhd-programs-strip--header {
   flex: 1 1 auto;
+  justify-content: center;
 }
 
 .lo-home .bhd-chrome-brand {

@@ -1,3 +1,35 @@
+.bhd-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 16px;
+}
+
+.bhd-chrome-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.bhd-chrome-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.bhd-chrome .bhd-programs-strip--header {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
 .bhd-app-icon {
   display: grid;
   place-items: center;

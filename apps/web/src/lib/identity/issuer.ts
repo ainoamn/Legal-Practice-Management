@@ -1,1 +1,1 @@
-export const DEFAULT_IDENTITY_ISSUER = "https://id.bhd-om.com";
+export { DEFAULT_IDENTITY_ISSUER } from "@/lib/bhd/identity-public";

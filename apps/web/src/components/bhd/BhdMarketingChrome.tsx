@@ -8,7 +8,9 @@ import { getCachedCatalogApps } from "../../lib/bhd/catalog";
 import { useBhdCatalog } from "../../lib/identity/use-bhd-catalog";
 import { BhdAppIcon } from "./BhdAppIcon";
 import { BhdAppSwitcher, type BhdSwitcherUser } from "./BhdAppSwitcher";
+import BhdProgramsStrip from "./BhdProgramsStrip";
 import "../../bhd-switcher.css";
+import "../../bhd-programs-strip.css";
 
 type Locale = "ar" | "en";
 
@@ -18,8 +20,9 @@ function isCurrentApp(app: BhdApp, pageOrigin: string) {
   const here = pageOrigin.replace(/\/$/, "");
   if (app.id === "legal") {
     return (
-      here === "https://legal-office-web.vercel.app" ||
+      here === "https://legal.bhd-om.com" ||
       here.includes("legal-office") ||
+      here.includes("legal.bhd-om") ||
       /^https?:\/\/(localhost|127\.0\.0\.1):4310$/.test(here)
     );
   }
@@ -62,7 +65,7 @@ export function BhdMarketingChrome({
 
   useEffect(() => {
     let live = true;
-    fetch("/api/v1/auth/me", { credentials: "same-origin", cache: "no-store" })
+    fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" })
       .then(async (response) => {
         if (!live) return;
         if (!response.ok) {
@@ -71,12 +74,12 @@ export function BhdMarketingChrome({
           return;
         }
         const me = (await response.json()) as {
-          user?: { fullName?: string; email?: string; id?: string };
+          user?: { name?: string; email?: string; id?: string };
         };
         if (me.user?.email) {
           setUser({
             id: me.user.id,
-            name: me.user.fullName || me.user.email,
+            name: me.user.name || me.user.email,
             email: me.user.email,
             picture: null,
             hasPassword: true,
@@ -124,6 +127,8 @@ export function BhdMarketingChrome({
         {brandMark}
         {brand}
       </Link>
+
+      <BhdProgramsStrip variant="header" locale={locale} />
 
       <div className="bhd-chrome-actions" ref={rootRef}>
         <button

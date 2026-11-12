@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { BhdAccountIsolation } from "../components/bhd/BhdAccountIsolation";
 import { NavigationWarmup } from "../components/NavigationWarmup";
 import "./globals.css";
 import "./landing.css";
@@ -32,6 +33,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.bhd-om.com" />
       </head>
       <body>
+        <BhdAccountIsolation />
         <NavigationWarmup />
         {children}
         <Script
