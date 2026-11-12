@@ -154,15 +154,28 @@ function ProviderMarks({
   );
 }
 
+/** صورة جوجل دائرية مضغوطة — نفس أسلوب خمسات/حسوب. */
+function googleAvatarSrc(picture: string | null | undefined) {
+  if (!picture) return undefined;
+  try {
+    if (!picture.includes("googleusercontent.com")) return picture;
+    if (/=s\d+/.test(picture)) return picture.replace(/=s\d+(-c)?/, "=s96-c");
+    return `${picture}${picture.includes("?") ? "&" : "?"}sz=96`;
+  } catch {
+    return picture;
+  }
+}
+
 function Face({ user, large = false }: { user: BhdSwitcherUser; large?: boolean }) {
   const [broken, setBroken] = useState(false);
-  const show = Boolean(user.picture) && !broken;
+  const src = googleAvatarSrc(user.picture);
+  const show = Boolean(src) && !broken;
   const initial = (user.name || user.email || "B").trim().slice(0, 1).toUpperCase();
   return (
     <span className={large ? "bhd-switcher-face is-large" : "bhd-switcher-face"}>
       {show ? (
         <img
-          src={user.picture || undefined}
+          src={src}
           alt=""
           width={large ? 56 : 40}
           height={large ? 56 : 40}
@@ -333,10 +346,36 @@ export function BhdAppSwitcher({
   }
 
   const initial = user.name.trim().slice(0, 1) || "B";
-  const showPicture = Boolean(user.picture) && !pictureBroken;
+  const avatarSrc = googleAvatarSrc(user.picture);
+  const showPicture = Boolean(avatarSrc) && !pictureBroken;
+  const launcherApps = catalogApps.filter((app) => app.enabled && app.id !== "account");
 
   return (
     <div className="bhd-switcher-slot" ref={rootRef}>
+      {/* ترتيب خمسات/حسوب: الصورة ثم شبكة التطبيقات */}
+      <button
+        type="button"
+        className="bhd-switcher-avatar"
+        aria-label={t.accountAria}
+        aria-haspopup="dialog"
+        aria-expanded={panel === "account"}
+        aria-controls={panel === "account" ? accountId : undefined}
+        onClick={() => setPanel((current) => (current === "account" ? null : "account"))}
+      >
+        {showPicture ? (
+          <img
+            src={avatarSrc}
+            alt=""
+            width={32}
+            height={32}
+            referrerPolicy="no-referrer"
+            onError={() => setPictureBroken(true)}
+          />
+        ) : (
+          <span>{initial}</span>
+        )}
+      </button>
+
       <button
         type="button"
         className="bhd-switcher-grid"
@@ -353,36 +392,13 @@ export function BhdAppSwitcher({
         </span>
       </button>
 
-      <button
-        type="button"
-        className="bhd-switcher-avatar"
-        aria-label={t.accountAria}
-        aria-haspopup="dialog"
-        aria-expanded={panel === "account"}
-        aria-controls={panel === "account" ? accountId : undefined}
-        onClick={() => setPanel((current) => (current === "account" ? null : "account"))}
-      >
-        {showPicture ? (
-          <img
-            src={user.picture || undefined}
-            alt=""
-            width={32}
-            height={32}
-            referrerPolicy="no-referrer"
-            onError={() => setPictureBroken(true)}
-          />
-        ) : (
-          <span>{initial}</span>
-        )}
-      </button>
-
       {panel === "apps" ? (
         <div className="bhd-switcher-card" id={appsId} role="dialog" aria-label={t.appsAria}>
           <div className="bhd-switcher-card-head">
             <p>{t.appsTitle}</p>
           </div>
           <div className="bhd-switcher-grid-apps">
-            {catalogApps.map((app) => {
+            {launcherApps.map((app) => {
               const current = origin ? isCurrentApp(app, origin) : false;
               const label = isArabic ? app.nameAr : app.nameEn;
               return (
